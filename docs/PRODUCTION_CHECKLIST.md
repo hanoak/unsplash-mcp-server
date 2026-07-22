@@ -31,7 +31,7 @@
 - [ ] `[v1]` No "core Unsplash experience" clone; no automated bulk downloading
 - [ ] `[v1]` Rate-limit handling + clear docs (demo 50/hr, prod 5,000/hr)
 - [ ] `[v1]` **Design the download-tracking trigger**: explicit "use" step (a dedicated `track_download` tool the agent calls on selection, and/or on `get_photo`) — **never fire per search result** (violates the guideline + burns the 50/hr budget); ping must be fire-and-forget / non-blocking
-- [ ] `[v1]` Send required headers: `Accept-Version: v1`, `Authorization: Client-ID <key>` (**header, never `?client_id=` query param** — keeps key out of loggable URLs), descriptive versioned User-Agent
+- [x] `[v1]` Send required headers: `Accept-Version: v1`, `Authorization: Client-ID <key>` (**header, never `?client_id=` query param** — keeps key out of loggable URLs), descriptive versioned User-Agent ✅ (`src/unsplash/client.ts`)
 - [ ] `[v1]` Make app identity configurable (`utm_source` + "Powered by Unsplash" credit) — one package serves many registered apps, so it's a documented config value, not hardcoded
 - [ ] `[v1]` "Unofficial — not affiliated with or endorsed by Unsplash" disclaimer (README + package.json) + brand/trademark compliance
 - [ ] `[v1]` Document app registration + Demo (50/hr) → Production (5,000/hr) approval flow (the #1 onboarding blocker)
@@ -46,7 +46,7 @@
 - [ ] `[v1]` Input sanitization before hitting the API
 - [~] `[v1]` Supply-chain: `npm publish --provenance`, committed lockfile, pinned CI actions (by SHA) — lockfile committed ✅, CI actions SHA-pinned ✅; `--provenance` comes with release automation (§5)
 - [x] `[v1]` **Fail-fast startup validation** of `UNSPLASH_ACCESS_KEY` — actionable stderr message + non-zero exit, not a cryptic 401 mid-conversation ✅ (`loadConfig` in `runServer`; verified by smoke)
-- [~] `[v1]` **Redact** the access key / Authorization header from all error messages and debug logs (they leak into publicly-pasted bug reports) — `redactSecret`/`createRedactor` helper built + tested (`src/lib/redact.ts`); wiring into the HTTP client's error paths comes with task 2
+- [~] `[v1]` **Redact** the access key / Authorization header from all error messages and debug logs (they leak into publicly-pasted bug reports) — wired into the HTTP client: all `UnsplashApiError` messages are redacted and logs only emit the path (never the auth header); MCP `isError` tool responses will also run through the redactor (tool layer)
 - [ ] `[v1]` Protect the publish path: npm account 2FA + OIDC trusted publishing (or a scoped least-privilege automation token)
 - [x] `[v1]` Least-privilege GitHub Actions permissions (top-level `permissions: contents: read`) ✅ (both workflows)
 - [ ] `[v1]` Dependency license-compliance check in CI (prevent a copyleft transitive dep contaminating the permissive license)
@@ -54,11 +54,11 @@
 
 ## 3. Reliability & robustness
 
-- [ ] `[v1]` Error mapping: Unsplash 401/403/404/429/5xx → clean MCP errors w/ actionable messages
-- [ ] `[v1]` Retries & backoff for 429/5xx (respect `Retry-After`)
-- [ ] `[v1]` Network timeouts (never hang forever)
-- [ ] `[v1]` Rate-limit awareness: read `X-Ratelimit-Remaining`, surface it
-- [ ] `[v1]` **Handle 403 = hourly quota exhausted** (Unsplash returns **403, not 429**, often with no `Retry-After`) — surface the reset window and stop, don't blindly retry in-window
+- [~] `[v1]` Error mapping: Unsplash 401/403/404/429/5xx → clean MCP errors w/ actionable messages — client maps to typed `UnsplashApiError` with actionable messages (`src/unsplash/errors.ts`); conversion to MCP `isError` results happens in the tool layer
+- [x] `[v1]` Retries & backoff for 429/5xx (respect `Retry-After`) ✅ (`src/unsplash/client.ts`)
+- [x] `[v1]` Network timeouts (never hang forever) ✅ (`AbortSignal.timeout`, default 10s; combines with caller signal)
+- [x] `[v1]` Rate-limit awareness: read `X-Ratelimit-Remaining`, surface it ✅ (returned on every response + logged at debug)
+- [x] `[v1]` **Handle 403 = hourly quota exhausted** (Unsplash returns **403, not 429**, often with no `Retry-After`) — surface the reset window and stop, don't blindly retry in-window ✅ (403 + remaining=0 → `rate_limit`, not retried)
 - [ ] `[v1]` Short-TTL in-memory metadata cache + in-flight concurrency cap (never cache image binaries) — stretches the tight hourly budget, blunts a looping agent
 
 ## 4. Testing & quality
