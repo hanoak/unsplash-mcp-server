@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createRedactor, redactSecret } from '../src/lib/redact.js'
+import { createRedactor, redactSecret } from '../../src/lib/redact.js'
 
 describe('redactSecret', () => {
   it('replaces every occurrence of the secret', () => {
