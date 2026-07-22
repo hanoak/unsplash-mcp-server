@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest'
 
-import { createServer, SERVER_NAME, SERVER_VERSION } from '../src/server.js'
+import type { Config } from '../src/config.js'
 import { logger } from '../src/lib/logger.js'
+import { createServer, SERVER_NAME, SERVER_VERSION } from '../src/server.js'
+import { UnsplashClient } from '../src/unsplash/client.js'
+
+const config: Config = { accessKey: 'test-key', appName: undefined }
+const ctx = { client: new UnsplashClient(config), config }
 
 describe('createServer', () => {
   it('constructs a connectable MCP server instance', () => {
-    const server = createServer()
+    const server = createServer(ctx)
     expect(server).toBeDefined()
     // The SDK exposes the low-level Server via `.server`.
     expect(server.server).toBeDefined()
