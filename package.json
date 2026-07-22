@@ -1,0 +1,93 @@
+{
+  "name": "@hanoak/unsplash-mcp-server",
+  "version": "0.0.0",
+  "description": "Production-ready Model Context Protocol (MCP) server for the Unsplash API — search photos, fetch details, and stay compliant with Unsplash attribution & download-tracking guidelines. Unofficial; not affiliated with or endorsed by Unsplash.",
+  "keywords": [
+    "mcp",
+    "modelcontextprotocol",
+    "model-context-protocol",
+    "mcp-server",
+    "unsplash",
+    "unsplash-api",
+    "images",
+    "photos",
+    "stock-photos",
+    "claude",
+    "ai",
+    "llm"
+  ],
+  "license": "MIT",
+  "author": "Hanoak S",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "unsplash-mcp-server": "dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hanoak/unsplash-mcp-server.git"
+  },
+  "homepage": "https://github.com/hanoak/unsplash-mcp-server#readme",
+  "bugs": {
+    "url": "https://github.com/hanoak/unsplash-mcp-server/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "overrides": {
+    "@modelcontextprotocol/sdk": {
+      "@hono/node-server": "^2.0.5"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
+    "prepublishOnly": "npm run build",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^20.19.43",
+    "eslint": "^10.7.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.7.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.6",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.65.0",
+    "vitest": "^4.1.10"
+  }
+}
