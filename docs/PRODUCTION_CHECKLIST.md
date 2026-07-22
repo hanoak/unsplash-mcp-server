@@ -16,11 +16,11 @@
 ## 0. Core stack decisions (foundational)
 
 - [x] `[v1]` Language/runtime: **TypeScript + Node** ✅ decided
-- [ ] `[v1]` Runtime validation with **zod** (tool inputs _and_ Unsplash API responses)
+- [~] `[v1]` Runtime validation with **zod** (tool inputs _and_ Unsplash API responses) — API-response schemas done (`src/schemas/`); tool-input schemas come with the tools
 - [x] `[v1]` Transport: **stdio** first (HTTP/SSE possible later) ✅ decided
 - [x] `[v1]` Module format: **ESM-only** ✅ decided (MCP SDK is ESM; simplest for a bin package)
 - [x] `[v1]` Node version target: **Node 20+** ✅ decided (Node 18 is EOL Apr 2025)
-- [ ] `[v1]` Use **lenient/passthrough zod on API responses** — validate only fields we consume, so an upstream field add/rename/reorder degrades gracefully instead of breaking every tool
+- [x] `[v1]` Use **lenient/passthrough zod on API responses** — validate only fields we consume, so an upstream field add/rename/reorder degrades gracefully instead of breaking every tool ✅ (`src/schemas/`: only `id` required, rest optional/nullable, unknown fields stripped; `parseResponse` warns-then-surfaces)
 
 ## 1. Unsplash API compliance (legal — non-negotiable)
 
