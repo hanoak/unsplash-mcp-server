@@ -64,7 +64,7 @@
 ## 4. Testing & quality
 
 - [ ] `[v1]` Unit tests (Vitest/Jest) with Unsplash API mocked (msw/nock) — no real calls in CI
-- [ ] `[v1]` Type-checking in CI, lint, format checks
+- [x] `[v1]` Type-checking in CI, lint, format checks ✅ (CI `quality` job runs `typecheck` + `lint` + `format:check`)
 - [ ] `[v1]` Coverage thresholds
 - [ ] `[v1]` Smoke/integration test for the MCP server handshake
 - [~] `[v1]` **Enforce stdout purity**: ESLint `no-console` (allow `console.error` only) + a test asserting stdout carries only valid JSON-RPC (disable dependency banners/update-notifiers) — ESLint rule in place (`eslint.config.js`); committed stdout-purity test still pending
@@ -87,7 +87,7 @@
 - [ ] `[v1]` CONTRIBUTING.md
 - [ ] `[v1]` CODE_OF_CONDUCT.md
 - [ ] `[v1]` Issue/PR templates
-- [ ] `[v1]` LICENSE confirmed permissive (MIT or similar)
+- [x] `[v1]` LICENSE confirmed permissive (MIT or similar) ✅ (MIT, © 2026 Hanoak S — matches `package.json` `license` field)
 - [ ] `[v1]` SECURITY.md (vulnerability reporting)
 - [ ] `[v1]` Badges: npm version, build status, license
 - [ ] `[v1]` Semantic versioning commitment
