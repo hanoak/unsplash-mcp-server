@@ -16,7 +16,7 @@
 ## 0. Core stack decisions (foundational)
 
 - [x] `[v1]` Language/runtime: **TypeScript + Node** ✅ decided
-- [ ] `[v1]` Runtime validation with **zod** (tool inputs *and* Unsplash API responses)
+- [ ] `[v1]` Runtime validation with **zod** (tool inputs _and_ Unsplash API responses)
 - [x] `[v1]` Transport: **stdio** first (HTTP/SSE possible later) ✅ decided
 - [x] `[v1]` Module format: **ESM-only** ✅ decided (MCP SDK is ESM; simplest for a bin package)
 - [x] `[v1]` Node version target: **Node 20+** ✅ decided (Node 18 is EOL Apr 2025)
@@ -40,8 +40,8 @@
 ## 2. Security & secrets
 
 - [ ] `[v1]` API key via env var only (`UNSPLASH_ACCESS_KEY`); never logged/committed
-- [ ] `[v1]` `.env.example` committed; real `.env` gitignored
-- [ ] `[v1]` Secret scanning (pre-commit hook / CI, e.g. gitleaks)
+- [x] `[v1]` `.env.example` committed; real `.env` gitignored ✅ (`.gitignore` covers `.env*`)
+- [~] `[v1]` Secret scanning (pre-commit hook / CI, e.g. gitleaks) — local `gitleaks protect --staged` pre-commit hook done (skip-if-absent + warn); CI gitleaks Action pending (§5)
 - [ ] `[v1]` Dependency security: `npm audit`, Dependabot/Renovate, minimal deps
 - [ ] `[v1]` Input sanitization before hitting the API
 - [ ] `[v1]` Supply-chain: `npm publish --provenance`, committed lockfile, pinned CI actions (by SHA)
@@ -67,7 +67,7 @@
 - [ ] `[v1]` Type-checking in CI, lint, format checks
 - [ ] `[v1]` Coverage thresholds
 - [ ] `[v1]` Smoke/integration test for the MCP server handshake
-- [ ] `[v1]` **Enforce stdout purity**: ESLint `no-console` (allow `console.error` only) + a test asserting stdout carries only valid JSON-RPC (disable dependency banners/update-notifiers)
+- [~] `[v1]` **Enforce stdout purity**: ESLint `no-console` (allow `console.error` only) + a test asserting stdout carries only valid JSON-RPC (disable dependency banners/update-notifiers) — ESLint rule in place (`eslint.config.js`); committed stdout-purity test still pending
 - [ ] `[v1]` E2E test that invokes a real tool over the transport + a compliance regression test asserting `download_location` fires on "use"
 - [ ] `[v1]` Validate zod schemas against committed **real captured** Unsplash response fixtures (sanitized)
 - [ ] `[v1]` CI test matrix: Node 18/20/22 × Linux/macOS/Windows (+ `.nvmrc`)
@@ -78,7 +78,7 @@
 
 - [ ] `[v1]` GitHub Actions: test/lint/build on PR
 - [ ] `[v1]` Automated releases (Changesets or semantic-release): version + changelog + npm publish
-- [ ] `[v1]` Conventional commits (pairs with automated releases)
+- [x] `[v1]` Conventional commits (pairs with automated releases) ✅ enforced via `commitlint` + `@commitlint/config-conventional` on the `commit-msg` hook
 - [ ] `[v1]` npm publish provenance
 
 ## 6. Developer & contributor experience ("community traction")
@@ -106,12 +106,12 @@
 
 ## 8. Distribution & runtime
 
-- [ ] `[v1]` `bin` entry for `npx` + shebang
-- [ ] `[v1]` `files` field ships only `dist/`
+- [x] `[v1]` `bin` entry for `npx` + shebang ✅ (shebang via tsup banner; verified by stdio smoke)
+- [x] `[v1]` `files` field ships only `dist/` ✅ (`npm pack`: 6 files, no source/config leaked)
 - [x] `[v1]` Build tooling: **tsup** ✅ decided (ESM-only output; handles shebang + .d.ts)
 - [ ] `[v1]` Cross-platform (macOS/Linux/Windows)
 - [ ] `[v1]` **Pre-publish package validation** in CI: `publint` + `@arethetypeswrong/cli` + `npm pack --dry-run`, then install the tarball and run the bin via npx (handshake) — catches broken exports maps, bad type paths, missing files entry, broken shebang, lost exec-bit/CRLF
-- [ ] `[v1]` Declare `engines.node` + a runtime Node-version guard (friendly message, not a cryptic crash)
+- [~] `[v1]` Declare `engines.node` + a runtime Node-version guard (friendly message, not a cryptic crash) — `engines.node ">=20"` declared; runtime guard pending
 - [ ] `[v1]` Support `--version` / `--help` and detect a TTY on the bin (so `npx unsplash-mcp-server` in a terminal prints usage instead of silently hanging on the stdio loop)
 - [ ] `[v1]` Populate package.json discoverability metadata (keywords: mcp/modelcontextprotocol/unsplash, description, repository, homepage, bugs)
 - [x] `[v1]` npm name: **`@hanoak/unsplash-mcp-server`** ✅ decided (3 unscoped names taken; scoped name free). Bin command: `unsplash-mcp-server`. Scope owned by the user (existing npm account `hanoak`). Differentiator: full Unsplash-guideline compliance (download tracking + attribution) built in.
@@ -119,7 +119,7 @@
 
 ## 9. Observability (lightweight)
 
-- [ ] `[v1]` Optional debug logging to **stderr only** (stdout is the MCP transport — never log there)
+- [x] `[v1]` Optional debug logging to **stderr only** (stdout is the MCP transport — never log there) ✅ (`src/lib/logger.ts`, `LOG_LEVEL`; verified by smoke)
 - [ ] `[v1]` Version/health info
 
 ## 10. Docs & maintenance
@@ -131,7 +131,7 @@
 ## 11. MCP protocol correctness (most-flagged gap)
 
 - [ ] `[v1]` Return recoverable failures as tool results with `isError: true`, **not** JSON-RPC protocol errors — 401/404/403-rate-limit/empty-results/bad-query come back as content the LLM can see and adapt to; only real transport faults throw
-- [ ] `[v1]` Graceful shutdown + crash safety: exit on stdin EOF / SIGINT / SIGTERM; `uncaughtException`/`unhandledRejection` handlers logging to stderr (no orphaned node processes; no stack trace corrupting the stdout frame)
+- [x] `[v1]` Graceful shutdown + crash safety: exit on stdin EOF / SIGINT / SIGTERM; `uncaughtException`/`unhandledRejection` handlers logging to stderr (no orphaned node processes; no stack trace corrupting the stdout frame) ✅ (`src/index.ts` + `src/server.ts`)
 - [ ] `[v1]` Declare MCP tool annotations (`readOnlyHint: true`, `openWorldHint: true`, `title`) — lets clients auto-approve safe reads
 - [ ] `[v1]` Namespace tool names (`unsplash_search_photos`, not `search_photos`) — avoids collisions in a client's flat tool namespace
 - [ ] `[v1]` Populate the server `instructions` field on initialize (hard-wire: always surface attribution; call download-tracking on selection)
