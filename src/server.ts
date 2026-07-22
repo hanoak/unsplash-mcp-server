@@ -3,11 +3,11 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 
 import { loadConfig } from './config.js'
 import { logger } from './lib/logger.js'
+import { PACKAGE_NAME, PACKAGE_VERSION } from './version.js'
 
-/** Package name used to identify the server to MCP clients. */
-export const SERVER_NAME = 'unsplash-mcp-server'
-/** Kept in sync with package.json at release time. */
-export const SERVER_VERSION = '0.0.0'
+/** Server identity reported to MCP clients (sourced from the shared version module). */
+export const SERVER_NAME = PACKAGE_NAME
+export const SERVER_VERSION = PACKAGE_VERSION
 
 /**
  * Build the MCP server instance. Tools/resources are registered here in later
