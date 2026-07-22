@@ -1,0 +1,60 @@
+import { z } from 'zod'
+
+/**
+ * Lenient schemas for the Unsplash responses we consume.
+ *
+ * Design: validate only the fields we actually use, and keep nearly everything
+ * optional/nullable. Unknown fields Unsplash adds are ignored (stripped);
+ * fields it renames or drops surface as `undefined` instead of crashing every
+ * tool. Only the essential `id` is required.
+ */
+
+export const PhotoUrlsSchema = z.object({
+  raw: z.string().optional(),
+  full: z.string().optional(),
+  regular: z.string().optional(),
+  small: z.string().optional(),
+  thumb: z.string().optional(),
+})
+export type PhotoUrls = z.infer<typeof PhotoUrlsSchema>
+
+export const PhotoLinksSchema = z.object({
+  html: z.string().optional(),
+  download: z.string().optional(),
+  // The endpoint that MUST be hit to comply with Unsplash's download guideline.
+  download_location: z.string().optional(),
+})
+export type PhotoLinks = z.infer<typeof PhotoLinksSchema>
+
+export const PhotoUserSchema = z.object({
+  id: z.string().optional(),
+  username: z.string().optional(),
+  name: z.string().nullish(),
+  links: z.object({ html: z.string().optional() }).optional(),
+})
+export type PhotoUser = z.infer<typeof PhotoUserSchema>
+
+export const PhotoSchema = z.object({
+  id: z.string(),
+  slug: z.string().nullish(),
+  description: z.string().nullish(),
+  alt_description: z.string().nullish(),
+  width: z.number().optional(),
+  height: z.number().optional(),
+  color: z.string().nullish(),
+  blur_hash: z.string().nullish(),
+  likes: z.number().optional(),
+  created_at: z.string().optional(),
+  urls: PhotoUrlsSchema.optional(),
+  links: PhotoLinksSchema.optional(),
+  user: PhotoUserSchema.optional(),
+})
+export type Photo = z.infer<typeof PhotoSchema>
+
+export const SearchPhotosResponseSchema = z.object({
+  total: z.number().optional(),
+  total_pages: z.number().optional(),
+  // Default to an empty list so a missing/renamed field degrades gracefully.
+  results: z.array(PhotoSchema).default([]),
+})
+export type SearchPhotosResponse = z.infer<typeof SearchPhotosResponseSchema>
