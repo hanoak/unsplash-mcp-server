@@ -41,14 +41,14 @@
 
 - [ ] `[v1]` API key via env var only (`UNSPLASH_ACCESS_KEY`); never logged/committed
 - [x] `[v1]` `.env.example` committed; real `.env` gitignored ✅ (`.gitignore` covers `.env*`)
-- [~] `[v1]` Secret scanning (pre-commit hook / CI, e.g. gitleaks) — local `gitleaks protect --staged` pre-commit hook done (skip-if-absent + warn); CI gitleaks Action pending (§5)
-- [ ] `[v1]` Dependency security: `npm audit`, Dependabot/Renovate, minimal deps
+- [x] `[v1]` Secret scanning (pre-commit hook / CI, e.g. gitleaks) ✅ local `gitleaks protect --staged` pre-commit hook (skip-if-absent + warn) + CI gitleaks Action full-history scan (`.github/workflows/secret-scan.yml`)
+- [~] `[v1]` Dependency security: `npm audit`, Dependabot/Renovate, minimal deps — Dependabot configured (`.github/dependabot.yml`: npm + github-actions, weekly); `npm audit` CI step still to add
 - [ ] `[v1]` Input sanitization before hitting the API
-- [ ] `[v1]` Supply-chain: `npm publish --provenance`, committed lockfile, pinned CI actions (by SHA)
+- [~] `[v1]` Supply-chain: `npm publish --provenance`, committed lockfile, pinned CI actions (by SHA) — lockfile committed ✅, CI actions SHA-pinned ✅; `--provenance` comes with release automation (§5)
 - [ ] `[v1]` **Fail-fast startup validation** of `UNSPLASH_ACCESS_KEY` — actionable stderr message + non-zero exit, not a cryptic 401 mid-conversation
 - [ ] `[v1]` **Redact** the access key / Authorization header from all error messages and debug logs (they leak into publicly-pasted bug reports)
 - [ ] `[v1]` Protect the publish path: npm account 2FA + OIDC trusted publishing (or a scoped least-privilege automation token)
-- [ ] `[v1]` Least-privilege GitHub Actions permissions (top-level `permissions: contents: read`)
+- [x] `[v1]` Least-privilege GitHub Actions permissions (top-level `permissions: contents: read`) ✅ (both workflows)
 - [ ] `[v1]` Dependency license-compliance check in CI (prevent a copyleft transitive dep contaminating the permissive license)
 - [ ] `[v1]` SSRF guard on URLs taken from API responses (`download_location`, image URLs) — only fire authenticated follow-ups to verified `api.unsplash.com` / `unsplash.com` hosts
 
@@ -70,13 +70,13 @@
 - [~] `[v1]` **Enforce stdout purity**: ESLint `no-console` (allow `console.error` only) + a test asserting stdout carries only valid JSON-RPC (disable dependency banners/update-notifiers) — ESLint rule in place (`eslint.config.js`); committed stdout-purity test still pending
 - [ ] `[v1]` E2E test that invokes a real tool over the transport + a compliance regression test asserting `download_location` fires on "use"
 - [ ] `[v1]` Validate zod schemas against committed **real captured** Unsplash response fixtures (sanitized)
-- [ ] `[v1]` CI test matrix: Node 18/20/22 × Linux/macOS/Windows (+ `.nvmrc`)
+- [x] `[v1]` CI test matrix: Node 20/22 × Linux/macOS/Windows (+ `.nvmrc`) ✅ (Node 18 intentionally dropped — EOL & below our `engines >=20`)
 - [ ] `[v1]` Document MCP Inspector (`npx @modelcontextprotocol/inspector`) in the dev/contributor workflow
 - [ ] `[v1]` Scheduled live schema-drift canary against the real Unsplash API (key-gated repo secret, off the PR path)
 
 ## 5. CI/CD & release automation ("easy to update in future")
 
-- [ ] `[v1]` GitHub Actions: test/lint/build on PR
+- [x] `[v1]` GitHub Actions: test/lint/build on PR ✅ (`.github/workflows/ci.yml` — quality job + test/build matrix; SHA-pinned actions, least-privilege perms)
 - [ ] `[v1]` Automated releases (Changesets or semantic-release): version + changelog + npm publish
 - [x] `[v1]` Conventional commits (pairs with automated releases) ✅ enforced via `commitlint` + `@commitlint/config-conventional` on the `commit-msg` hook
 - [ ] `[v1]` npm publish provenance
@@ -109,7 +109,7 @@
 - [x] `[v1]` `bin` entry for `npx` + shebang ✅ (shebang via tsup banner; verified by stdio smoke)
 - [x] `[v1]` `files` field ships only `dist/` ✅ (`npm pack`: 6 files, no source/config leaked)
 - [x] `[v1]` Build tooling: **tsup** ✅ decided (ESM-only output; handles shebang + .d.ts)
-- [ ] `[v1]` Cross-platform (macOS/Linux/Windows)
+- [x] `[v1]` Cross-platform (macOS/Linux/Windows) ✅ (CI matrix covers all three; `.gitattributes` forces LF so Windows checkouts keep prettier & shebang intact)
 - [ ] `[v1]` **Pre-publish package validation** in CI: `publint` + `@arethetypeswrong/cli` + `npm pack --dry-run`, then install the tarball and run the bin via npx (handshake) — catches broken exports maps, bad type paths, missing files entry, broken shebang, lost exec-bit/CRLF
 - [~] `[v1]` Declare `engines.node` + a runtime Node-version guard (friendly message, not a cryptic crash) — `engines.node ">=20"` declared; runtime guard pending
 - [ ] `[v1]` Support `--version` / `--help` and detect a TTY on the bin (so `npx unsplash-mcp-server` in a terminal prints usage instead of silently hanging on the stdio loop)
