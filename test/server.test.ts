@@ -6,7 +6,7 @@ import { createServer, SERVER_NAME, SERVER_VERSION } from '../src/server.js'
 import { UnsplashClient } from '../src/unsplash/client.js'
 
 const config: Config = { accessKey: 'test-key', appName: undefined }
-const ctx = { client: new UnsplashClient(config), config }
+const ctx = { client: new UnsplashClient(config), config, redact: (s: string) => s }
 
 describe('createServer', () => {
   it('constructs a connectable MCP server instance', () => {
