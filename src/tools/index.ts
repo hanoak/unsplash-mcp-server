@@ -2,8 +2,10 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 
 import type { Config } from '../config.js'
 import type { UnsplashClient } from '../unsplash/client.js'
+import { registerCollectionTools } from './collections.js'
 import { registerPhotoTools } from './photos.js'
 import { registerSearchTools } from './search.js'
+import { registerUserTools } from './users.js'
 
 /**
  * Dependencies injected into every tool handler. Built by the composition root
@@ -29,6 +31,7 @@ export interface ToolContext {
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerPhotoTools(server, ctx)
   registerSearchTools(server, ctx)
-  // Future domains: registerCollectionTools, registerTopicTools, registerUserTools,
-  // registerStatsTools.
+  registerUserTools(server, ctx)
+  registerCollectionTools(server, ctx)
+  // Future domains: registerTopicTools, registerStatsTools.
 }
