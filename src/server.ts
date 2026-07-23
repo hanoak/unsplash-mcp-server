@@ -35,6 +35,17 @@ export async function runServer(): Promise<void> {
   // Fail fast: validate the environment before opening the transport, so a
   // missing key surfaces as a clear startup message, not a cryptic 401 later.
   const config = loadConfig()
+
+  // Attribution nudge (optional, non-blocking): a generic utm_source is still
+  // valid, but Unsplash expects it to match your registered app name.
+  if (config.appName === undefined) {
+    logger.warn(
+      'UNSPLASH_APP_NAME is not set — attribution utm_source defaults to ' +
+        '"unsplash_mcp_server". Set it to your registered Unsplash app name for ' +
+        'correct attribution (see the README).',
+    )
+  }
+
   const client = new UnsplashClient(config)
   const redact = createRedactor(config.accessKey)
   const server = createServer({ client, config, redact })
