@@ -21,14 +21,10 @@ export interface ToolContext {
 }
 
 /**
- * Register all Unsplash MCP tools onto the server. Each tool lives in its own
- * file under `src/tools/` and exposes a registrar this function calls, e.g.:
- *
- *   registerSearchPhotos(server, ctx)
- *
- * No tools are implemented yet, so this is currently a no-op — but the seam
- * exists so tools land by adding one file + one call here, never by editing
- * `server.ts`.
+ * Register all Unsplash MCP tools onto the server. Tools are grouped one file
+ * per resource domain under `src/tools/`, and each file exposes a registrar
+ * (e.g. `registerSearchTools`) that this function calls. Adding a tool means
+ * editing its domain file — never `server.ts`.
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerPhotoTools(server, ctx)
