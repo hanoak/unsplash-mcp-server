@@ -13,14 +13,31 @@ export const SERVER_NAME = PACKAGE_NAME
 export const SERVER_VERSION = PACKAGE_VERSION
 
 /**
+ * Server-wide guidance sent to clients on `initialize`. This is the one place
+ * to hard-wire Unsplash-compliance behaviour across every client/model.
+ */
+export const SERVER_INSTRUCTIONS = [
+  'This server provides read-only access to the Unsplash photo library.',
+  '',
+  'When you present or use an Unsplash photo, follow the Unsplash API guidelines:',
+  '- ALWAYS surface the attribution returned with each photo (the `attribution.text`',
+  '  or `attribution.html` field). Crediting the photographer and Unsplash is required.',
+  '- When a photo is actually used (selected, embedded, downloaded, or displayed to the',
+  "  user), call `unsplash_track_download` with that photo's `download_location`. Do this",
+  '  once per photo actually used — never for every search result.',
+  '- Image URLs are hotlinks to Unsplash; use them directly and do not rehost them.',
+  '- Search/random results are content-filtered to "high" safety by default.',
+].join('\n')
+
+/**
  * Build the MCP server and register its tools against the injected context.
  * Pure and dependency-injected — tests pass a fake client via `ctx`.
  */
 export function createServer(ctx: ToolContext): McpServer {
-  const server = new McpServer({
-    name: SERVER_NAME,
-    version: SERVER_VERSION,
-  })
+  const server = new McpServer(
+    { name: SERVER_NAME, version: SERVER_VERSION },
+    { instructions: SERVER_INSTRUCTIONS },
+  )
 
   registerTools(server, ctx)
 
