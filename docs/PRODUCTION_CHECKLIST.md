@@ -25,14 +25,14 @@
 ## 1. Unsplash API compliance (legal — non-negotiable)
 
 - [ ] `[v1]` Trigger the `download_location` endpoint when a photo is used
-- [ ] `[v1]` Attribution: photographer name + profile link + Unsplash link, with UTM params
-- [ ] `[v1]` Return ready-to-use attribution text/HTML per photo
-- [ ] `[v1]` Serve image URLs directly from Unsplash (no hotlink/rehost)
+- [x] `[v1]` Attribution: photographer name + profile link + Unsplash link, with UTM params ✅ attribution helper w/ UTM (src/tools/format.ts)
+- [x] `[v1]` Return ready-to-use attribution text/HTML per photo ✅ attribution.text + .html
+- [x] `[v1]` Serve image URLs directly from Unsplash (no hotlink/rehost) ✅ return Unsplash URLs, never rehosted
 - [ ] `[v1]` No "core Unsplash experience" clone; no automated bulk downloading
 - [ ] `[v1]` Rate-limit handling + clear docs (demo 50/hr, prod 5,000/hr)
 - [ ] `[v1]` **Design the download-tracking trigger**: explicit "use" step (a dedicated `track_download` tool the agent calls on selection, and/or on `get_photo`) — **never fire per search result** (violates the guideline + burns the 50/hr budget); ping must be fire-and-forget / non-blocking
 - [x] `[v1]` Send required headers: `Accept-Version: v1`, `Authorization: Client-ID <key>` (**header, never `?client_id=` query param** — keeps key out of loggable URLs), descriptive versioned User-Agent ✅ (`src/unsplash/client.ts`)
-- [ ] `[v1]` Make app identity configurable (`utm_source` + "Powered by Unsplash" credit) — one package serves many registered apps, so it's a documented config value, not hardcoded
+- [x] `[v1]` Make app identity configurable (`utm_source` + "Powered by Unsplash" credit) — one package serves many registered apps, so it's a documented config value, not hardcoded ✅ utm_source from config.appName
 - [ ] `[v1]` "Unofficial — not affiliated with or endorsed by Unsplash" disclaimer (README + package.json) + brand/trademark compliance
 - [ ] `[v1]` Document app registration + Demo (50/hr) → Production (5,000/hr) approval flow (the #1 onboarding blocker)
 - [ ] `[v1]` State that each user operates under their own Unsplash API Terms/License (attribution, hotlinking, download tracking are their responsibility) — sets the liability boundary
@@ -46,7 +46,7 @@
 - [ ] `[v1]` Input sanitization before hitting the API
 - [~] `[v1]` Supply-chain: `npm publish --provenance`, committed lockfile, pinned CI actions (by SHA) — lockfile committed ✅, CI actions SHA-pinned ✅; `--provenance` comes with release automation (§5)
 - [x] `[v1]` **Fail-fast startup validation** of `UNSPLASH_ACCESS_KEY` — actionable stderr message + non-zero exit, not a cryptic 401 mid-conversation ✅ (`loadConfig` in `runServer`; verified by smoke)
-- [~] `[v1]` **Redact** the access key / Authorization header from all error messages and debug logs (they leak into publicly-pasted bug reports) — wired into the HTTP client: all `UnsplashApiError` messages are redacted and logs only emit the path (never the auth header); MCP `isError` tool responses will also run through the redactor (tool layer)
+- [x] `[v1]` **Redact** the access key / Authorization header from all error messages and debug logs (they leak into publicly-pasted bug reports) — wired into the HTTP client: all `UnsplashApiError` messages are redacted and logs only emit the path (never the auth header); MCP `isError` tool responses will also run through the redactor (tool layer) ✅ now also applied to MCP isError responses via ctx.redact
 - [ ] `[v1]` Protect the publish path: npm account 2FA + OIDC trusted publishing (or a scoped least-privilege automation token)
 - [x] `[v1]` Least-privilege GitHub Actions permissions (top-level `permissions: contents: read`) ✅ (both workflows)
 - [ ] `[v1]` Dependency license-compliance check in CI (prevent a copyleft transitive dep contaminating the permissive license)
@@ -54,7 +54,7 @@
 
 ## 3. Reliability & robustness
 
-- [~] `[v1]` Error mapping: Unsplash 401/403/404/429/5xx → clean MCP errors w/ actionable messages — client maps to typed `UnsplashApiError` with actionable messages (`src/unsplash/errors.ts`); conversion to MCP `isError` results happens in the tool layer
+- [x] `[v1]` Error mapping: Unsplash 401/403/404/429/5xx → clean MCP errors w/ actionable messages — client maps to typed `UnsplashApiError` with actionable messages (`src/unsplash/errors.ts`); conversion to MCP `isError` results happens in the tool layer ✅ client -> toToolError -> isError; verified (401 test)
 - [x] `[v1]` Retries & backoff for 429/5xx (respect `Retry-After`) ✅ (`src/unsplash/client.ts`)
 - [x] `[v1]` Network timeouts (never hang forever) ✅ (`AbortSignal.timeout`, default 10s; combines with caller signal)
 - [x] `[v1]` Rate-limit awareness: read `X-Ratelimit-Remaining`, surface it ✅ (returned on every response + logged at debug)
@@ -96,12 +96,12 @@
 
 ## 7. API surface / DX of the server
 
-- [ ] `[v1]` Decide tool set (search photos, get photo, random, collections, user, topics, stats…)
+- [x] `[v1]` Decide tool set (search photos, get photo, random, collections, user, topics, stats…) ✅ 21 read endpoints for v1; 8 OAuth deferred
 - [ ] `[v1]` Consistent, well-described tool schemas (descriptions matter — LLM reads them)
 - [ ] `[v1]` Token-efficient output shape (trim huge Unsplash responses)
 - [ ] `[v1]` Pagination support
 - [ ] `[v1]` **Clamp/normalize params to Unsplash bounds**: `per_page` & random `count` ≤30, `page` ≥1, zod enums for orientation/order_by/color, URL-encode queries; cap returned item count
-- [ ] `[v1]` Return **hotlinkable image URLs + metadata as text, never base64 image blobs** (base64 balloons tokens + edges into rehosting)
+- [x] `[v1]` Return **hotlinkable image URLs + metadata as text, never base64 image blobs** (base64 balloons tokens + edges into rehosting) ✅ toCompactPhoto returns URLs as text
 - [ ] `[v1]` Offer sized image URLs via imgix params (`w`/`h`/`q`/`fm`/`fit`) or sensible size defaults instead of full-res raw URLs
 
 ## 8. Distribution & runtime
@@ -130,19 +130,19 @@
 
 ## 11. MCP protocol correctness (most-flagged gap)
 
-- [ ] `[v1]` Return recoverable failures as tool results with `isError: true`, **not** JSON-RPC protocol errors — 401/404/403-rate-limit/empty-results/bad-query come back as content the LLM can see and adapt to; only real transport faults throw
+- [x] `[v1]` Return recoverable failures as tool results with `isError: true`, **not** JSON-RPC protocol errors — 401/404/403-rate-limit/empty-results/bad-query come back as content the LLM can see and adapt to; only real transport faults throw ✅ src/tools/result.ts toToolError; verified by integration test
 - [x] `[v1]` Graceful shutdown + crash safety: exit on stdin EOF / SIGINT / SIGTERM; `uncaughtException`/`unhandledRejection` handlers logging to stderr (no orphaned node processes; no stack trace corrupting the stdout frame) ✅ (`src/index.ts` + `src/server.ts`)
-- [ ] `[v1]` Declare MCP tool annotations (`readOnlyHint: true`, `openWorldHint: true`, `title`) — lets clients auto-approve safe reads
-- [ ] `[v1]` Namespace tool names (`unsplash_search_photos`, not `search_photos`) — avoids collisions in a client's flat tool namespace
+- [x] `[v1]` Declare MCP tool annotations (`readOnlyHint: true`, `openWorldHint: true`, `title`) — lets clients auto-approve safe reads ✅ readOnlyHint+openWorldHint+title on the tool
+- [x] `[v1]` Namespace tool names (`unsplash_search_photos`, not `search_photos`) — avoids collisions in a client's flat tool namespace ✅ unsplash_random_photo
 - [ ] `[v1]` Populate the server `instructions` field on initialize (hard-wire: always surface attribution; call download-tracking on selection)
-- [ ] `[v1]` Keep tool `inputSchema`s flat and JSON-Schema-safe (no top-level unions/`anyOf`, no deep refinements — several clients choke on them)
+- [x] `[v1]` Keep tool `inputSchema`s flat and JSON-Schema-safe (no top-level unions/`anyOf`, no deep refinements — several clients choke on them) ✅ flat shape; verified converts to JSON Schema at runtime
 - [ ] `[v1]` Structured tool output via `outputSchema` + `structuredContent` (derived from the same zod schemas), with a text fallback
-- [ ] `[v1]` Honor MCP request cancellation (`notifications/cancelled` → `AbortController`)
+- [x] `[v1]` Honor MCP request cancellation (`notifications/cancelled` → `AbortController`) ✅ extra.signal passed through to client.get
 - [ ] `[v1]` Optional MCP Resources / Prompts (e.g. attribution-guide resource, "find a photo for X" prompt)
 
 ## 12. Content safety & responsible use
 
-- [ ] `[v1]` Default `content_filter=high` on search/random (overridable) — an LLM-invoked public image tool must not surface explicit content unprompted
+- [x] `[v1]` Default `content_filter=high` on search/random (overridable) — an LLM-invoked public image tool must not surface explicit content unprompted ✅ implemented on random; search reuses
 - [ ] `[v1]` Treat Unsplash text fields (descriptions, alt_text, tags, user bios, EXIF) as untrusted data / indirect prompt-injection surface — label clearly as data; never interpolate into privileged/system prompts
 
 ## 13. Discovery & ecosystem
