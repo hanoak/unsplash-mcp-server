@@ -64,3 +64,23 @@ export const SearchPhotosResponseSchema = z.object({
   results: z.array(PhotoSchema).default([]),
 })
 export type SearchPhotosResponse = z.infer<typeof SearchPhotosResponseSchema>
+
+/** Response of `GET /photos/{id}/download` — a fresh, trackable download URL. */
+export const DownloadLinkSchema = z.object({
+  url: z.string().optional(),
+})
+export type DownloadLink = z.infer<typeof DownloadLinkSchema>
+
+/** One stat series (`downloads` or `views`); `historical` is large and unused. */
+export const StatSchema = z.object({
+  total: z.number().optional(),
+  historical: z.unknown().optional(),
+})
+
+/** Response of `GET /photos/{id}/statistics`. */
+export const PhotoStatisticsSchema = z.object({
+  id: z.string().optional(),
+  downloads: StatSchema.optional(),
+  views: StatSchema.optional(),
+})
+export type PhotoStatistics = z.infer<typeof PhotoStatisticsSchema>

@@ -104,3 +104,112 @@ describe('unsplash_random_photo (in-memory MCP integration)', () => {
     expect(firstText(res)).toContain('401')
   })
 })
+
+describe('photos domain tools (in-memory MCP integration)', () => {
+  it('registers all five photos-domain tools with correct annotations', async () => {
+    const { fn } = fakeFetch(() => jsonResponse(photoFixture))
+    const client = await connect(fn)
+    const { tools } = await client.listTools()
+    const names = tools.map((t) => t.name)
+    expect(names).toEqual(
+      expect.arrayContaining([
+        'unsplash_random_photo',
+        'unsplash_list_photos',
+        'unsplash_get_photo',
+        'unsplash_photo_statistics',
+        'unsplash_track_download',
+      ]),
+    )
+    // track_download registers a download event → not read-only.
+    expect(tools.find((t) => t.name === 'unsplash_track_download')?.annotations?.readOnlyHint).toBe(
+      false,
+    )
+    expect(tools.find((t) => t.name === 'unsplash_get_photo')?.annotations?.readOnlyHint).toBe(true)
+  })
+
+  it('unsplash_list_photos returns compact photos and clamps per_page to 30', async () => {
+    const { fn, calls } = fakeFetch(() =>
+      jsonResponse([photoFixture, { ...photoFixture, id: 'p2' }]),
+    )
+    const client = await connect(fn)
+    const res = (await client.callTool({
+      name: 'unsplash_list_photos',
+      arguments: { per_page: 100 },
+    })) as CallToolResult
+    expect(res.isError).toBeFalsy()
+    const parsed = JSON.parse(firstText(res)) as {
+      count: number
+      per_page: number
+      photos: Array<{ id: string }>
+    }
+    expect(parsed.count).toBe(2)
+    expect(parsed.per_page).toBe(30)
+    expect(parsed.photos[0]!.id).toBe('rand123')
+    expect(calls[0]).toContain('per_page=30')
+  })
+
+  it('unsplash_get_photo fetches by id and returns one photo', async () => {
+    const { fn, calls } = fakeFetch(() => jsonResponse(photoFixture))
+    const client = await connect(fn)
+    const res = (await client.callTool({
+      name: 'unsplash_get_photo',
+      arguments: { id: 'rand123' },
+    })) as CallToolResult
+    expect(res.isError).toBeFalsy()
+    expect((JSON.parse(firstText(res)) as { photo: { id: string } }).photo.id).toBe('rand123')
+    expect(calls[0]).toContain('/photos/rand123')
+  })
+
+  it('unsplash_photo_statistics returns totals and clamps quantity to 30', async () => {
+    const { fn, calls } = fakeFetch(() =>
+      jsonResponse({
+        id: 'rand123',
+        downloads: { total: 100, historical: { change: 5 } },
+        views: { total: 5000, historical: {} },
+      }),
+    )
+    const client = await connect(fn)
+    const res = (await client.callTool({
+      name: 'unsplash_photo_statistics',
+      arguments: { id: 'rand123', quantity: 90 },
+    })) as CallToolResult
+    expect(res.isError).toBeFalsy()
+    const parsed = JSON.parse(firstText(res)) as {
+      downloads_total: number
+      views_total: number
+      period_days: number
+    }
+    expect(parsed.downloads_total).toBe(100)
+    expect(parsed.views_total).toBe(5000)
+    expect(parsed.period_days).toBe(30)
+    expect(calls[0]).toContain('quantity=30')
+  })
+
+  it('unsplash_track_download hits the download_location and returns a url', async () => {
+    const { fn, calls } = fakeFetch(() =>
+      jsonResponse({ url: 'https://images.unsplash.com/dl.jpg' }),
+    )
+    const client = await connect(fn)
+    const res = (await client.callTool({
+      name: 'unsplash_track_download',
+      arguments: { download_location: 'https://api.unsplash.com/photos/rand123/download?ixid=abc' },
+    })) as CallToolResult
+    expect(res.isError).toBeFalsy()
+    const parsed = JSON.parse(firstText(res)) as { tracked: boolean; download_url: string }
+    expect(parsed.tracked).toBe(true)
+    expect(parsed.download_url).toBe('https://images.unsplash.com/dl.jpg')
+    expect(calls[0]).toContain('/photos/rand123/download?ixid=abc')
+  })
+
+  it('unsplash_track_download refuses a non-Unsplash host (SSRF guard) without fetching', async () => {
+    const { fn, calls } = fakeFetch(() => jsonResponse({ url: 'x' }))
+    const client = await connect(fn)
+    const res = (await client.callTool({
+      name: 'unsplash_track_download',
+      arguments: { download_location: 'https://evil.example.com/photos/x/download' },
+    })) as CallToolResult
+    expect(res.isError).toBe(true)
+    expect(firstText(res)).toContain('non-Unsplash')
+    expect(calls.length).toBe(0)
+  })
+})
