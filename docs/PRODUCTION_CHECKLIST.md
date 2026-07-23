@@ -134,7 +134,7 @@
 - [x] `[v1]` Graceful shutdown + crash safety: exit on stdin EOF / SIGINT / SIGTERM; `uncaughtException`/`unhandledRejection` handlers logging to stderr (no orphaned node processes; no stack trace corrupting the stdout frame) ✅ (`src/index.ts` + `src/server.ts`)
 - [x] `[v1]` Declare MCP tool annotations (`readOnlyHint: true`, `openWorldHint: true`, `title`) — lets clients auto-approve safe reads ✅ readOnlyHint+openWorldHint+title on the tool
 - [x] `[v1]` Namespace tool names (`unsplash_search_photos`, not `search_photos`) — avoids collisions in a client's flat tool namespace ✅ unsplash_random_photo
-- [ ] `[v1]` Populate the server `instructions` field on initialize (hard-wire: always surface attribution; call download-tracking on selection)
+- [x] `[v1]` Populate the server `instructions` field on initialize (hard-wire: always surface attribution; call download-tracking on selection) ✅ `SERVER_INSTRUCTIONS` in `src/server.ts`; verified via `client.getInstructions()`
 - [x] `[v1]` Keep tool `inputSchema`s flat and JSON-Schema-safe (no top-level unions/`anyOf`, no deep refinements — several clients choke on them) ✅ flat shape; verified converts to JSON Schema at runtime
 - [ ] `[v1]` Structured tool output via `outputSchema` + `structuredContent` (derived from the same zod schemas), with a text fallback
 - [x] `[v1]` Honor MCP request cancellation (`notifications/cancelled` → `AbortController`) ✅ extra.signal passed through to client.get
