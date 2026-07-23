@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { StatSchema } from './photo.js'
+
 /**
  * Lenient schema for an Unsplash user (spec `User.Basic`/`User.Full`). Only the
  * fields we surface are modelled; everything but `id` is optional/nullable.
@@ -32,3 +34,11 @@ export const SearchUsersResponseSchema = z.object({
   results: z.array(UserSchema).default([]),
 })
 export type SearchUsersResponse = z.infer<typeof SearchUsersResponseSchema>
+
+/** Response of `GET /users/{username}/statistics`. */
+export const UserStatisticsSchema = z.object({
+  username: z.string().optional(),
+  downloads: StatSchema.optional(),
+  views: StatSchema.optional(),
+})
+export type UserStatistics = z.infer<typeof UserStatisticsSchema>
