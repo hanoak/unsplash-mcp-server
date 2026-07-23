@@ -24,13 +24,13 @@
 
 ## 1. Unsplash API compliance (legal — non-negotiable)
 
-- [ ] `[v1]` Trigger the `download_location` endpoint when a photo is used
+- [x] `[v1]` Trigger the `download_location` endpoint when a photo is used ✅ unsplash_track_download tool
 - [x] `[v1]` Attribution: photographer name + profile link + Unsplash link, with UTM params ✅ attribution helper w/ UTM (src/tools/format.ts)
 - [x] `[v1]` Return ready-to-use attribution text/HTML per photo ✅ attribution.text + .html
 - [x] `[v1]` Serve image URLs directly from Unsplash (no hotlink/rehost) ✅ return Unsplash URLs, never rehosted
 - [ ] `[v1]` No "core Unsplash experience" clone; no automated bulk downloading
 - [ ] `[v1]` Rate-limit handling + clear docs (demo 50/hr, prod 5,000/hr)
-- [ ] `[v1]` **Design the download-tracking trigger**: explicit "use" step (a dedicated `track_download` tool the agent calls on selection, and/or on `get_photo`) — **never fire per search result** (violates the guideline + burns the 50/hr budget); ping must be fire-and-forget / non-blocking
+- [x] `[v1]` **Design the download-tracking trigger**: explicit "use" step (a dedicated `track_download` tool the agent calls on selection, and/or on `get_photo`) — **never fire per search result** (violates the guideline + burns the 50/hr budget); ping must be fire-and-forget / non-blocking ✅ dedicated track_download tool, explicit use, SSRF-guarded
 - [x] `[v1]` Send required headers: `Accept-Version: v1`, `Authorization: Client-ID <key>` (**header, never `?client_id=` query param** — keeps key out of loggable URLs), descriptive versioned User-Agent ✅ (`src/unsplash/client.ts`)
 - [x] `[v1]` Make app identity configurable (`utm_source` + "Powered by Unsplash" credit) — one package serves many registered apps, so it's a documented config value, not hardcoded ✅ utm_source from config.appName
 - [ ] `[v1]` "Unofficial — not affiliated with or endorsed by Unsplash" disclaimer (README + package.json) + brand/trademark compliance
@@ -43,14 +43,14 @@
 - [x] `[v1]` `.env.example` committed; real `.env` gitignored ✅ (`.gitignore` covers `.env*`)
 - [x] `[v1]` Secret scanning (pre-commit hook / CI, e.g. gitleaks) ✅ local `gitleaks protect --staged` pre-commit hook (skip-if-absent + warn) + CI gitleaks Action full-history scan (`.github/workflows/secret-scan.yml`)
 - [~] `[v1]` Dependency security: `npm audit`, Dependabot/Renovate, minimal deps — Dependabot configured (`.github/dependabot.yml`: npm + github-actions, weekly); `npm audit` CI step still to add
-- [ ] `[v1]` Input sanitization before hitting the API
+- [x] `[v1]` Input sanitization before hitting the API ✅ zod input schemas + clamping + URL/host validation + encodeURIComponent
 - [~] `[v1]` Supply-chain: `npm publish --provenance`, committed lockfile, pinned CI actions (by SHA) — lockfile committed ✅, CI actions SHA-pinned ✅; `--provenance` comes with release automation (§5)
 - [x] `[v1]` **Fail-fast startup validation** of `UNSPLASH_ACCESS_KEY` — actionable stderr message + non-zero exit, not a cryptic 401 mid-conversation ✅ (`loadConfig` in `runServer`; verified by smoke)
 - [x] `[v1]` **Redact** the access key / Authorization header from all error messages and debug logs (they leak into publicly-pasted bug reports) — wired into the HTTP client: all `UnsplashApiError` messages are redacted and logs only emit the path (never the auth header); MCP `isError` tool responses will also run through the redactor (tool layer) ✅ now also applied to MCP isError responses via ctx.redact
 - [ ] `[v1]` Protect the publish path: npm account 2FA + OIDC trusted publishing (or a scoped least-privilege automation token)
 - [x] `[v1]` Least-privilege GitHub Actions permissions (top-level `permissions: contents: read`) ✅ (both workflows)
 - [ ] `[v1]` Dependency license-compliance check in CI (prevent a copyleft transitive dep contaminating the permissive license)
-- [ ] `[v1]` SSRF guard on URLs taken from API responses (`download_location`, image URLs) — only fire authenticated follow-ups to verified `api.unsplash.com` / `unsplash.com` hosts
+- [x] `[v1]` SSRF guard on URLs taken from API responses (`download_location`, image URLs) — only fire authenticated follow-ups to verified `api.unsplash.com` / `unsplash.com` hosts ✅ track_download validates host == api.unsplash.com
 
 ## 3. Reliability & robustness
 
@@ -66,9 +66,9 @@
 - [ ] `[v1]` Unit tests (Vitest/Jest) with Unsplash API mocked (msw/nock) — no real calls in CI
 - [x] `[v1]` Type-checking in CI, lint, format checks ✅ (CI `quality` job runs `typecheck` + `lint` + `format:check`)
 - [ ] `[v1]` Coverage thresholds
-- [ ] `[v1]` Smoke/integration test for the MCP server handshake
+- [x] `[v1]` Smoke/integration test for the MCP server handshake ✅ in-memory Client<->Server integration test (handshake + list + call), test/tools/photos.test.ts
 - [~] `[v1]` **Enforce stdout purity**: ESLint `no-console` (allow `console.error` only) + a test asserting stdout carries only valid JSON-RPC (disable dependency banners/update-notifiers) — ESLint rule in place (`eslint.config.js`); committed stdout-purity test still pending
-- [ ] `[v1]` E2E test that invokes a real tool over the transport + a compliance regression test asserting `download_location` fires on "use"
+- [x] `[v1]` E2E test that invokes a real tool over the transport + a compliance regression test asserting `download_location` fires on "use" ✅ in-memory tool-call tests + track_download asserts it fires download_location
 - [ ] `[v1]` Validate zod schemas against committed **real captured** Unsplash response fixtures (sanitized)
 - [x] `[v1]` CI test matrix: Node 20/22 × Linux/macOS/Windows (+ `.nvmrc`) ✅ (Node 18 intentionally dropped — EOL & below our `engines >=20`)
 - [ ] `[v1]` Document MCP Inspector (`npx @modelcontextprotocol/inspector`) in the dev/contributor workflow
@@ -97,10 +97,10 @@
 ## 7. API surface / DX of the server
 
 - [x] `[v1]` Decide tool set (search photos, get photo, random, collections, user, topics, stats…) ✅ 21 read endpoints for v1; 8 OAuth deferred
-- [ ] `[v1]` Consistent, well-described tool schemas (descriptions matter — LLM reads them)
-- [ ] `[v1]` Token-efficient output shape (trim huge Unsplash responses)
-- [ ] `[v1]` Pagination support
-- [ ] `[v1]` **Clamp/normalize params to Unsplash bounds**: `per_page` & random `count` ≤30, `page` ≥1, zod enums for orientation/order_by/color, URL-encode queries; cap returned item count
+- [x] `[v1]` Consistent, well-described tool schemas (descriptions matter — LLM reads them) ✅ all 5 photos tools + inputs described
+- [x] `[v1]` Token-efficient output shape (trim huge Unsplash responses) ✅ toCompactPhoto + compact stats
+- [x] `[v1]` Pagination support ✅ list_photos page/per_page
+- [x] `[v1]` **Clamp/normalize params to Unsplash bounds**: `per_page` & random `count` ≤30, `page` ≥1, zod enums for orientation/order_by/color, URL-encode queries; cap returned item count ✅ per_page/quantity clamped to 30, page>=1, zod enums, path encoded
 - [x] `[v1]` Return **hotlinkable image URLs + metadata as text, never base64 image blobs** (base64 balloons tokens + edges into rehosting) ✅ toCompactPhoto returns URLs as text
 - [ ] `[v1]` Offer sized image URLs via imgix params (`w`/`h`/`q`/`fm`/`fit`) or sensible size defaults instead of full-res raw URLs
 
