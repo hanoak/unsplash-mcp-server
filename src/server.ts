@@ -3,6 +3,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 
 import { loadConfig } from './config.js'
 import { logger } from './lib/logger.js'
+import { createRedactor } from './lib/redact.js'
 import { registerTools, type ToolContext } from './tools/index.js'
 import { UnsplashClient } from './unsplash/client.js'
 import { PACKAGE_NAME, PACKAGE_VERSION } from './version.js'
@@ -35,7 +36,8 @@ export async function runServer(): Promise<void> {
   // missing key surfaces as a clear startup message, not a cryptic 401 later.
   const config = loadConfig()
   const client = new UnsplashClient(config)
-  const server = createServer({ client, config })
+  const redact = createRedactor(config.accessKey)
+  const server = createServer({ client, config, redact })
 
   const transport = new StdioServerTransport()
   await server.connect(transport)

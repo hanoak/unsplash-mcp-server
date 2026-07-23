@@ -2,6 +2,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 
 import type { Config } from '../config.js'
 import type { UnsplashClient } from '../unsplash/client.js'
+import { registerPhotoTools } from './photos.js'
 
 /**
  * Dependencies injected into every tool handler. Built by the composition root
@@ -10,6 +11,8 @@ import type { UnsplashClient } from '../unsplash/client.js'
 export interface ToolContext {
   readonly client: UnsplashClient
   readonly config: Config
+  /** Secret redactor bound to the access key; applied to MCP error output. */
+  readonly redact: (input: string) => string
 }
 
 /**
@@ -23,7 +26,7 @@ export interface ToolContext {
  * `server.ts`.
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
-  // Intentionally unused until the first tool is added.
-  void server
-  void ctx
+  registerPhotoTools(server, ctx)
+  // Future domains: registerCollectionTools, registerTopicTools, registerUserTools,
+  // registerSearchTools, registerStatsTools.
 }

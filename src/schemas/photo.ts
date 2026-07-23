@@ -7,6 +7,12 @@ import { z } from 'zod'
  * optional/nullable. Unknown fields Unsplash adds are ignored (stripped);
  * fields it renames or drops surface as `undefined` instead of crashing every
  * tool. Only the essential `id` is required.
+ *
+ * Reconciled against the Unsplash OpenAPI `Asset.Basic`/`Asset.Full` schemas:
+ * field names and types match (incl. the compliance-critical
+ * `links.download_location`); we deliberately relax the spec's `required` to
+ * stay lenient. The spec omits `alt_description`/`likes`/`slug`, which the live
+ * API does return — kept optional here so both cases work.
  */
 
 export const PhotoUrlsSchema = z.object({
