@@ -5,6 +5,7 @@ import type { UnsplashClient } from '../unsplash/client.js'
 import { registerCollectionTools } from './collections.js'
 import { registerPhotoTools } from './photos.js'
 import { registerSearchTools } from './search.js'
+import { registerTopicTools } from './topics.js'
 import { registerUserTools } from './users.js'
 
 /**
@@ -33,5 +34,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerSearchTools(server, ctx)
   registerUserTools(server, ctx)
   registerCollectionTools(server, ctx)
-  // Future domains: registerTopicTools, registerStatsTools.
+  registerTopicTools(server, ctx)
+  // Future domains: registerStatsTools.
 }
