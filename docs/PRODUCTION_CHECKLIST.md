@@ -29,13 +29,13 @@
 - [x] `[v1]` Return ready-to-use attribution text/HTML per photo ✅ attribution.text + .html
 - [x] `[v1]` Serve image URLs directly from Unsplash (no hotlink/rehost) ✅ return Unsplash URLs, never rehosted
 - [ ] `[v1]` No "core Unsplash experience" clone; no automated bulk downloading
-- [ ] `[v1]` Rate-limit handling + clear docs (demo 50/hr, prod 5,000/hr)
+- [x] `[v1]` Rate-limit handling + clear docs (demo 50/hr, prod 5,000/hr) ✅ client surfaces remaining + 403 handling; README documents tiers + troubleshooting
 - [x] `[v1]` **Design the download-tracking trigger**: explicit "use" step (a dedicated `track_download` tool the agent calls on selection, and/or on `get_photo`) — **never fire per search result** (violates the guideline + burns the 50/hr budget); ping must be fire-and-forget / non-blocking ✅ dedicated track_download tool, explicit use, SSRF-guarded
 - [x] `[v1]` Send required headers: `Accept-Version: v1`, `Authorization: Client-ID <key>` (**header, never `?client_id=` query param** — keeps key out of loggable URLs), descriptive versioned User-Agent ✅ (`src/unsplash/client.ts`)
 - [x] `[v1]` Make app identity configurable (`utm_source` + "Powered by Unsplash" credit) — one package serves many registered apps, so it's a documented config value, not hardcoded ✅ utm_source from config.appName
-- [ ] `[v1]` "Unofficial — not affiliated with or endorsed by Unsplash" disclaimer (README + package.json) + brand/trademark compliance
-- [ ] `[v1]` Document app registration + Demo (50/hr) → Production (5,000/hr) approval flow (the #1 onboarding blocker)
-- [ ] `[v1]` State that each user operates under their own Unsplash API Terms/License (attribution, hotlinking, download tracking are their responsibility) — sets the liability boundary
+- [x] `[v1]` "Unofficial — not affiliated with or endorsed by Unsplash" disclaimer (README + package.json) + brand/trademark compliance ✅ README IMPORTANT note + package.json description
+- [x] `[v1]` Document app registration + Demo (50/hr) → Production (5,000/hr) approval flow (the #1 onboarding blocker) ✅ README Quick start + Requirements
+- [x] `[v1]` State that each user operates under their own Unsplash API Terms/License (attribution, hotlinking, download tracking are their responsibility) — sets the liability boundary ✅ README IMPORTANT note
 
 ## 2. Security & secrets
 
@@ -83,16 +83,16 @@
 
 ## 6. Developer & contributor experience ("community traction")
 
-- [ ] `[v1]` README: quick start, `npx` one-liner, Claude Desktop/Cursor config, tool reference
-- [ ] `[v1]` CONTRIBUTING.md
-- [ ] `[v1]` CODE_OF_CONDUCT.md
-- [ ] `[v1]` Issue/PR templates
+- [x] `[v1]` README: quick start, `npx` one-liner, Claude Desktop/Cursor config, tool reference ✅ README.md
+- [x] `[v1]` CONTRIBUTING.md ✅ CONTRIBUTING.md
+- [x] `[v1]` CODE_OF_CONDUCT.md ✅ Contributor Covenant 2.1
+- [x] `[v1]` Issue/PR templates ✅ .github/ISSUE_TEMPLATE + PULL_REQUEST_TEMPLATE
 - [x] `[v1]` LICENSE confirmed permissive (MIT or similar) ✅ (MIT, © 2026 Hanoak S — matches `package.json` `license` field)
-- [ ] `[v1]` SECURITY.md (vulnerability reporting)
-- [ ] `[v1]` Badges: npm version, build status, license
-- [ ] `[v1]` Semantic versioning commitment
-- [ ] `[v1]` Explicit **no-telemetry / privacy statement** ("collects nothing, only contacts api.unsplash.com") — users hand an npx binary their key
-- [ ] `[v1]` README troubleshooting section (key not set, Node too old, stale npx cache, wrong client config path)
+- [x] `[v1]` SECURITY.md (vulnerability reporting) ✅ SECURITY.md
+- [x] `[v1]` Badges: npm version, build status, license ✅ in README
+- [x] `[v1]` Semantic versioning commitment ✅ stated in README + CONTRIBUTING
+- [x] `[v1]` Explicit **no-telemetry / privacy statement** ("collects nothing, only contacts api.unsplash.com") — users hand an npx binary their key ✅ README Privacy section
+- [x] `[v1]` README troubleshooting section (key not set, Node too old, stale npx cache, wrong client config path) ✅ README Troubleshooting section
 
 ## 7. API surface / DX of the server
 
@@ -124,8 +124,8 @@
 
 ## 10. Docs & maintenance
 
-- [ ] `[v1]` CHANGELOG (auto-generated)
-- [ ] `[v1]` Compatibility matrix (MCP SDK / Node versions supported)
+- [~] `[v1]` CHANGELOG (auto-generated) — manual CHANGELOG.md added; Changesets automation comes with the release step
+- [~] `[v1]` Compatibility matrix (MCP SDK / Node versions supported) — Node >=20 documented in README Requirements + CONTRIBUTING; formal matrix TBD
 - [ ] `[v1]` Deprecation policy for future breaking changes
 
 ## 11. MCP protocol correctness (most-flagged gap)
