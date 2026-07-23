@@ -1,4 +1,5 @@
 export * from './photo.js'
 export * from './collection.js'
 export * from './user.js'
+export * from './topic.js'
 export * from './parse.js'

@@ -1,5 +1,6 @@
 import type { Collection } from '../schemas/collection.js'
 import type { Photo } from '../schemas/photo.js'
+import type { Topic } from '../schemas/topic.js'
 import type { User } from '../schemas/user.js'
 
 const UNSPLASH_BASE = 'https://unsplash.com'
@@ -149,5 +150,37 @@ export function toCompactCollection(
     curator: collection.user
       ? { name: collection.user.name ?? undefined, username: collection.user.username ?? undefined }
       : undefined,
+  }
+}
+
+/** Token-efficient projection of an Unsplash topic. */
+export interface CompactTopic {
+  readonly id: string
+  readonly slug: string | undefined
+  readonly title: string | undefined
+  readonly description: string | null
+  readonly total_photos: number | undefined
+  readonly status: string | undefined
+  readonly topic_page: string | undefined
+  readonly cover_photo: CompactPhoto | null
+  readonly owners:
+    | ReadonlyArray<{ readonly name: string | undefined; readonly username: string | undefined }>
+    | undefined
+}
+
+export function toCompactTopic(topic: Topic, appName: string | undefined): CompactTopic {
+  return {
+    id: topic.id,
+    slug: topic.slug ?? undefined,
+    title: topic.title ?? undefined,
+    description: topic.description ?? null,
+    total_photos: topic.total_photos,
+    status: topic.status ?? undefined,
+    topic_page: topic.links?.html,
+    cover_photo: topic.cover_photo ? toCompactPhoto(topic.cover_photo, appName) : null,
+    owners: topic.owners?.map((o) => ({
+      name: o.name ?? undefined,
+      username: o.username ?? undefined,
+    })),
   }
 }
