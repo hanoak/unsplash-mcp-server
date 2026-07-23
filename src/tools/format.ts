@@ -1,4 +1,6 @@
+import type { Collection } from '../schemas/collection.js'
 import type { Photo } from '../schemas/photo.js'
+import type { User } from '../schemas/user.js'
 
 const UNSPLASH_BASE = 'https://unsplash.com'
 const DEFAULT_UTM_SOURCE = 'unsplash_mcp_server'
@@ -91,5 +93,61 @@ export function toCompactPhoto(photo: Photo, appName: string | undefined): Compa
       profile: photo.user?.links?.html,
     },
     attribution: buildAttribution(photo, appName),
+  }
+}
+
+/** Token-efficient projection of an Unsplash user. */
+export interface CompactUser {
+  readonly id: string
+  readonly username: string | undefined
+  readonly name: string | undefined
+  readonly bio: string | null
+  readonly location: string | null
+  readonly profile_url: string | undefined
+  readonly profile_image: string | undefined
+  readonly total_photos: number | undefined
+  readonly total_collections: number | undefined
+}
+
+export function toCompactUser(user: User): CompactUser {
+  return {
+    id: user.id,
+    username: user.username ?? undefined,
+    name: user.name ?? undefined,
+    bio: user.bio ?? null,
+    location: user.location ?? null,
+    profile_url: user.links?.html,
+    profile_image: user.profile_image?.medium,
+    total_photos: user.total_photos,
+    total_collections: user.total_collections,
+  }
+}
+
+/** Token-efficient projection of an Unsplash collection. */
+export interface CompactCollection {
+  readonly id: string
+  readonly title: string | undefined
+  readonly description: string | null
+  readonly total_photos: number | undefined
+  readonly collection_page: string | undefined
+  readonly cover_photo: CompactPhoto | null
+  readonly curator:
+    { readonly name: string | undefined; readonly username: string | undefined } | undefined
+}
+
+export function toCompactCollection(
+  collection: Collection,
+  appName: string | undefined,
+): CompactCollection {
+  return {
+    id: collection.id,
+    title: collection.title ?? undefined,
+    description: collection.description ?? null,
+    total_photos: collection.total_photos,
+    collection_page: collection.links?.html,
+    cover_photo: collection.cover_photo ? toCompactPhoto(collection.cover_photo, appName) : null,
+    curator: collection.user
+      ? { name: collection.user.name ?? undefined, username: collection.user.username ?? undefined }
+      : undefined,
   }
 }

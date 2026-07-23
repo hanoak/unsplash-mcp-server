@@ -16,7 +16,7 @@
 ## 0. Core stack decisions (foundational)
 
 - [x] `[v1]` Language/runtime: **TypeScript + Node** ✅ decided
-- [~] `[v1]` Runtime validation with **zod** (tool inputs _and_ Unsplash API responses) — API-response schemas done (`src/schemas/`); tool-input schemas come with the tools
+- [x] `[v1]` Runtime validation with **zod** (tool inputs _and_ Unsplash API responses) ✅ response schemas in `src/schemas/`; tool-input schemas on all 8 tools (photos + search)
 - [x] `[v1]` Transport: **stdio** first (HTTP/SSE possible later) ✅ decided
 - [x] `[v1]` Module format: **ESM-only** ✅ decided (MCP SDK is ESM; simplest for a bin package)
 - [x] `[v1]` Node version target: **Node 20+** ✅ decided (Node 18 is EOL Apr 2025)
