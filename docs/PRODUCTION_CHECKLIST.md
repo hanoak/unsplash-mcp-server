@@ -42,12 +42,12 @@
 - [x] `[v1]` API key via env var only (`UNSPLASH_ACCESS_KEY`); never logged/committed ✅ (`src/config.ts` reads env only; never logged)
 - [x] `[v1]` `.env.example` committed; real `.env` gitignored ✅ (`.gitignore` covers `.env*`)
 - [x] `[v1]` Secret scanning (pre-commit hook / CI, e.g. gitleaks) ✅ local `gitleaks protect --staged` pre-commit hook (skip-if-absent + warn) + CI gitleaks Action full-history scan (`.github/workflows/secret-scan.yml`)
-- [~] `[v1]` Dependency security: `npm audit`, Dependabot/Renovate, minimal deps — Dependabot configured (`.github/dependabot.yml`: npm + github-actions, weekly); `npm audit` CI step still to add
+- [x] `[v1]` Dependency security: `npm audit`, Dependabot/Renovate, minimal deps ✅ Dependabot (`.github/dependabot.yml`) + `npm audit --omit=dev --audit-level=high` step in CI
 - [x] `[v1]` Input sanitization before hitting the API ✅ zod input schemas + clamping + URL/host validation + encodeURIComponent
-- [~] `[v1]` Supply-chain: `npm publish --provenance`, committed lockfile, pinned CI actions (by SHA) — lockfile committed ✅, CI actions SHA-pinned ✅; `--provenance` comes with release automation (§5)
+- [x] `[v1]` Supply-chain: `npm publish --provenance`, committed lockfile, pinned CI actions (by SHA) ✅ committed lockfile, SHA-pinned actions, and `--provenance` via `.github/workflows/release.yml`
 - [x] `[v1]` **Fail-fast startup validation** of `UNSPLASH_ACCESS_KEY` — actionable stderr message + non-zero exit, not a cryptic 401 mid-conversation ✅ (`loadConfig` in `runServer`; verified by smoke)
 - [x] `[v1]` **Redact** the access key / Authorization header from all error messages and debug logs (they leak into publicly-pasted bug reports) — wired into the HTTP client: all `UnsplashApiError` messages are redacted and logs only emit the path (never the auth header); MCP `isError` tool responses will also run through the redactor (tool layer) ✅ now also applied to MCP isError responses via ctx.redact
-- [ ] `[v1]` Protect the publish path: npm account 2FA + OIDC trusted publishing (or a scoped least-privilege automation token)
+- [~] `[v1]` Protect the publish path: npm account 2FA + OIDC trusted publishing (or a scoped least-privilege automation token) — release.yml wired for token + provenance publish; user must add the NPM_TOKEN secret and enable npm 2FA/trusted publishing
 - [x] `[v1]` Least-privilege GitHub Actions permissions (top-level `permissions: contents: read`) ✅ (both workflows)
 - [ ] `[v1]` Dependency license-compliance check in CI (prevent a copyleft transitive dep contaminating the permissive license)
 - [x] `[v1]` SSRF guard on URLs taken from API responses (`download_location`, image URLs) — only fire authenticated follow-ups to verified `api.unsplash.com` / `unsplash.com` hosts ✅ track_download validates host == api.unsplash.com
@@ -77,9 +77,9 @@
 ## 5. CI/CD & release automation ("easy to update in future")
 
 - [x] `[v1]` GitHub Actions: test/lint/build on PR ✅ (`.github/workflows/ci.yml` — quality job + test/build matrix; SHA-pinned actions, least-privilege perms)
-- [ ] `[v1]` Automated releases (Changesets or semantic-release): version + changelog + npm publish
+- [x] `[v1]` Automated releases (Changesets or semantic-release): version + changelog + npm publish ✅ Changesets + .github/workflows/release.yml
 - [x] `[v1]` Conventional commits (pairs with automated releases) ✅ enforced via `commitlint` + `@commitlint/config-conventional` on the `commit-msg` hook
-- [ ] `[v1]` npm publish provenance
+- [x] `[v1]` npm publish provenance ✅ release.yml: NPM_CONFIG_PROVENANCE + id-token:write
 
 ## 6. Developer & contributor experience ("community traction")
 
@@ -110,10 +110,10 @@
 - [x] `[v1]` `files` field ships only `dist/` ✅ (`npm pack`: 6 files, no source/config leaked)
 - [x] `[v1]` Build tooling: **tsup** ✅ decided (ESM-only output; handles shebang + .d.ts)
 - [x] `[v1]` Cross-platform (macOS/Linux/Windows) ✅ (CI matrix covers all three; `.gitattributes` forces LF so Windows checkouts keep prettier & shebang intact)
-- [ ] `[v1]` **Pre-publish package validation** in CI: `publint` + `@arethetypeswrong/cli` + `npm pack --dry-run`, then install the tarball and run the bin via npx (handshake) — catches broken exports maps, bad type paths, missing files entry, broken shebang, lost exec-bit/CRLF
+- [x] `[v1]` **Pre-publish package validation** in CI: `publint` + `@arethetypeswrong/cli` + `npm pack --dry-run`, then install the tarball and run the bin via npx (handshake) — catches broken exports maps, bad type paths, missing files entry, broken shebang, lost exec-bit/CRLF ✅ CI package job: publint + attw (esm-only) + npm pack --dry-run + --version bin smoke
 - [~] `[v1]` Declare `engines.node` + a runtime Node-version guard (friendly message, not a cryptic crash) — `engines.node ">=20"` declared; runtime guard pending
-- [ ] `[v1]` Support `--version` / `--help` and detect a TTY on the bin (so `npx unsplash-mcp-server` in a terminal prints usage instead of silently hanging on the stdio loop)
-- [ ] `[v1]` Populate package.json discoverability metadata (keywords: mcp/modelcontextprotocol/unsplash, description, repository, homepage, bugs)
+- [x] `[v1]` Support `--version` / `--help` and detect a TTY on the bin (so `npx unsplash-mcp-server` in a terminal prints usage instead of silently hanging on the stdio loop) ✅ src/index.ts; verified via bin smoke
+- [x] `[v1]` Populate package.json discoverability metadata (keywords: mcp/modelcontextprotocol/unsplash, description, repository, homepage, bugs) ✅ keywords/description/repository/homepage/bugs set
 - [x] `[v1]` npm name: **`@hanoak/unsplash-mcp-server`** ✅ decided (3 unscoped names taken; scoped name free). Bin command: `unsplash-mcp-server`. Scope owned by the user (existing npm account `hanoak`). Differentiator: full Unsplash-guideline compliance (download tracking + attribution) built in.
 - [ ] `[v1]` Ship a Desktop Extension (`.mcpb`) bundle for one-click Claude Desktop install
 
@@ -124,7 +124,7 @@
 
 ## 10. Docs & maintenance
 
-- [~] `[v1]` CHANGELOG (auto-generated) — manual CHANGELOG.md added; Changesets automation comes with the release step
+- [x] `[v1]` CHANGELOG (auto-generated) ✅ `CHANGELOG.md` + Changesets manages it via `changeset version`
 - [~] `[v1]` Compatibility matrix (MCP SDK / Node versions supported) — Node >=20 documented in README Requirements + CONTRIBUTING; formal matrix TBD
 - [ ] `[v1]` Deprecation policy for future breaking changes
 
