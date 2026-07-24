@@ -1,4 +1,5 @@
 import { ConfigError } from './config.js'
+import { nodeVersionError } from './lib/node-guard.js'
 import { runServer } from './server.js'
 import { PACKAGE_NAME, PACKAGE_VERSION } from './version.js'
 
@@ -41,6 +42,14 @@ function fatal(prefix: string, error: unknown): never {
 }
 
 function main(): void {
+  // Refuse to run on an unsupported Node.js with a clear message instead of a
+  // cryptic crash mid-conversation when a newer API is missing.
+  const versionError = nodeVersionError()
+  if (versionError !== null) {
+    process.stderr.write(`${versionError}\n`)
+    process.exit(1)
+  }
+
   const args = new Set(process.argv.slice(2))
 
   if (args.has('--version') || args.has('-v')) {
