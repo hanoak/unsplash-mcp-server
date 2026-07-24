@@ -5,7 +5,7 @@ import { SearchCollectionsResponseSchema } from '../schemas/collection.js'
 import { parseResponse } from '../schemas/parse.js'
 import { SearchPhotosResponseSchema } from '../schemas/photo.js'
 import { SearchUsersResponseSchema } from '../schemas/user.js'
-import { toCompactCollection, toCompactPhoto, toCompactUser } from './format.js'
+import { IMAGE_URL_HINT, toCompactCollection, toCompactPhoto, toCompactUser } from './format.js'
 import type { ToolContext } from './index.js'
 import { toJsonResult, toToolError } from './result.js'
 
@@ -76,7 +76,8 @@ export function registerSearchTools(server: McpServer, ctx: ToolContext): void {
       description:
         'Search Unsplash photos by keyword, with optional filters (orientation, color, order, ' +
         'collections, language). Returns paginated compact photos with URLs and ready-to-use ' +
-        'attribution. Content is filtered to "high" safety by default. Read-only.',
+        'attribution. Content is filtered to "high" safety by default. Read-only.' +
+        IMAGE_URL_HINT,
       inputSchema: searchPhotosInput,
       annotations: READ_ONLY,
     },

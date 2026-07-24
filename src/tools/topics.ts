@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { parseResponse } from '../schemas/parse.js'
 import { PhotoSchema } from '../schemas/photo.js'
 import { TopicSchema } from '../schemas/topic.js'
-import { toCompactPhoto, toCompactTopic } from './format.js'
+import { IMAGE_URL_HINT, toCompactPhoto, toCompactTopic } from './format.js'
 import type { ToolContext } from './index.js'
 import { toJsonResult, toToolError } from './result.js'
 
@@ -101,7 +101,8 @@ export function registerTopicTools(server: McpServer, ctx: ToolContext): void {
       title: 'Unsplash Topic Photos',
       description:
         'List the photos in a topic (paginated), with URLs and ready-to-use attribution. ' +
-        'Read-only.',
+        'Read-only.' +
+        IMAGE_URL_HINT,
       inputSchema: topicPhotosInput,
       annotations: READ_ONLY,
     },
