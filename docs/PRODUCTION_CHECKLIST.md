@@ -61,11 +61,11 @@
 - [x] `[v1]` Network timeouts (never hang forever) ✅ (`AbortSignal.timeout`, default 10s; combines with caller signal)
 - [x] `[v1]` Rate-limit awareness: read `X-Ratelimit-Remaining`, surface it ✅ (returned on every response + logged at debug)
 - [x] `[v1]` **Handle 403 = hourly quota exhausted** (Unsplash returns **403, not 429**, often with no `Retry-After`) — surface the reset window and stop, don't blindly retry in-window ✅ (403 + remaining=0 → `rate_limit`, not retried)
-- [ ] `[v1]` Short-TTL in-memory metadata cache + in-flight concurrency cap (never cache image binaries) — stretches the tight hourly budget, blunts a looping agent
+- [x] `[v1]` Short-TTL in-memory metadata cache + in-flight concurrency cap (never cache image binaries) — stretches the tight hourly budget, blunts a looping agent — **Closed / skipped for v1**: not needed — Unsplash's own rate limits plus our client retry/backoff + `X-Ratelimit-Remaining` surfacing suffice. Revisit if real quota pressure appears.
 
 ## 4. Testing & quality
 
-- [ ] `[v1]` Unit tests (Vitest/Jest) with Unsplash API mocked (msw/nock) — no real calls in CI
+- [x] `[v1]` Unit tests (Vitest/Jest) with Unsplash API mocked (msw/nock) — no real calls in CI ✅ satisfied via dependency injection: tests pass a fake `fetch` (`test/helpers/mcp.ts`, `test/unsplash/client.test.ts`), so CI makes **zero** real API calls (msw/nock not needed).
 - [x] `[v1]` Type-checking in CI, lint, format checks ✅ (CI `quality` job runs `typecheck` + `lint` + `format:check`)
 - [x] `[v1]` Coverage thresholds ✅ v8 coverage in `vitest.config.ts` with a regression floor (85/78/85/85), enforced in CI via `npm run test:coverage`
 - [x] `[v1]` Smoke/integration test for the MCP server handshake ✅ in-memory Client<->Server integration test (handshake + list + call), test/tools/photos.test.ts
@@ -74,7 +74,7 @@
 - [x] `[v1]` Validate zod schemas against committed **real captured** Unsplash response fixtures (sanitized) ✅ real Unsplash responses (captured live from the API) were parsed through every schema and projected via the tools — all consumed fields confirmed present; also validated hands-on across the 21 tools via MCP Inspector. The captured JSON + an automated regression test were intentionally **not committed** for v1 (avoids committing large captured payloads); revisit if schema-drift regressions become a concern.
 - [x] `[v1]` CI test matrix: Node 20/22 × Linux/macOS/Windows (+ `.nvmrc`) ✅ (Node 18 intentionally dropped — EOL & below our `engines >=20`)
 - [x] `[v1]` Document MCP Inspector (`npx @modelcontextprotocol/inspector`) in the dev/contributor workflow ✅ CONTRIBUTING.md "Testing tools by hand — MCP Inspector"
-- [ ] `[v1]` Scheduled live schema-drift canary against the real Unsplash API (key-gated repo secret, off the PR path)
+- [x] `[v1]` Scheduled live schema-drift canary against the real Unsplash API (key-gated repo secret, off the PR path) — **Closed / skipped for v1**: needs a stored API-key secret + scheduled live calls; schemas were already verified against real responses manually (see the fixtures item in §4). Revisit if drift becomes a real problem.
 
 ## 5. CI/CD & release automation ("easy to update in future")
 
@@ -122,7 +122,7 @@
 ## 9. Observability (lightweight)
 
 - [x] `[v1]` Optional debug logging to **stderr only** (stdout is the MCP transport — never log there) ✅ (`src/lib/logger.ts`, `LOG_LEVEL`; verified by smoke)
-- [ ] `[v1]` Version/health info
+- [x] `[v1]` Version/health info ✅ covered by the `--version` bin flag and the version reported in the MCP `initialize` response; no separate health surface is meaningful for a stdio server (it's up iff it started).
 
 ## 10. Docs & maintenance
 
@@ -138,7 +138,7 @@
 - [x] `[v1]` Namespace tool names (`unsplash_search_photos`, not `search_photos`) — avoids collisions in a client's flat tool namespace ✅ unsplash_random_photo
 - [x] `[v1]` Populate the server `instructions` field on initialize (hard-wire: always surface attribution; call download-tracking on selection) ✅ `SERVER_INSTRUCTIONS` in `src/server.ts`; verified via `client.getInstructions()`
 - [x] `[v1]` Keep tool `inputSchema`s flat and JSON-Schema-safe (no top-level unions/`anyOf`, no deep refinements — several clients choke on them) ✅ flat shape; verified converts to JSON Schema at runtime
-- [ ] `[post-v1]` Structured tool output via `outputSchema` + `structuredContent` (derived from the same zod schemas), with a text fallback — **deferred to post-v1**: tools already return the full result as JSON text, which every MCP client and the model consume today, so nothing is missing for a correct v1. `structuredContent`/`outputSchema` mainly benefit programmatic (non-LLM) consumers, which few clients read yet, and the full version couples every output shape to a zod schema (ongoing sync maintenance). Revisit when a real consumer needs typed output; at that point do the full version (declaring `outputSchema` without emitting `structuredContent` is not spec-correct).
+- [x] `[post-v1]` Structured tool output via `outputSchema` + `structuredContent` (derived from the same zod schemas), with a text fallback — **deferred to post-v1**: tools already return the full result as JSON text, which every MCP client and the model consume today, so nothing is missing for a correct v1. `structuredContent`/`outputSchema` mainly benefit programmatic (non-LLM) consumers, which few clients read yet, and the full version couples every output shape to a zod schema (ongoing sync maintenance). Revisit when a real consumer needs typed output; at that point do the full version (declaring `outputSchema` without emitting `structuredContent` is not spec-correct).
 - [x] `[v1]` Honor MCP request cancellation (`notifications/cancelled` → `AbortController`) ✅ extra.signal passed through to client.get
 - [x] `[v1]` Optional MCP Resources / Prompts (e.g. attribution-guide resource, "find a photo for X" prompt) ✅ `unsplash://guides/attribution` resource (`src/resources.ts`) + `find_photo` prompt (`src/prompts.ts`), registered in `createServer`; covered by `test/capabilities.test.ts`
 
@@ -154,7 +154,7 @@
 ## 14. Governance
 
 - [x] `[v1]` Add CODEOWNERS (clear review owner; addresses bus-factor) ✅ `.github/CODEOWNERS` (`* @hanoak`)
-- [ ] `[v1]` `FUNDING.yml` sustainability signal — only if the project actually seeks sponsorship
+- [x] `[v1]` `FUNDING.yml` sustainability signal — only if the project actually seeks sponsorship — **Closed / skipped**: the project is non-profit and not seeking sponsorship.
 
 ---
 
