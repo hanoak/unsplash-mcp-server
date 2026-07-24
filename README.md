@@ -70,6 +70,13 @@ All tools are namespaced `unsplash_*` and are read-only except `unsplash_track_d
 
 > Writing to Unsplash (creating/updating collections, likes, editing your profile) requires OAuth and is planned for a future release.
 
+### Resources & prompts
+
+Beyond tools, the server also exposes:
+
+- **Resource** `unsplash://guides/attribution` — a compact compliance guide (attribution, download tracking, hotlinking, content safety) your client can pull in as context.
+- **Prompt** `find_photo` — give it a `subject` (and optional `orientation`); it expands into a task that searches Unsplash and presents an attributed result.
+
 ## Attribution & compliance
 
 Every photo result includes an `attribution` object with ready-to-use `text` and `html` (with the required UTM parameters). **When you display or use a photo, show that attribution** — it credits the photographer and links back to Unsplash, as the guidelines require.

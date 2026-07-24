@@ -4,6 +4,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { loadConfig } from './config.js'
 import { logger } from './lib/logger.js'
 import { createRedactor } from './lib/redact.js'
+import { registerPrompts } from './prompts.js'
+import { registerResources } from './resources.js'
 import { registerTools, type ToolContext } from './tools/index.js'
 import { UnsplashClient } from './unsplash/client.js'
 import { PACKAGE_NAME, PACKAGE_VERSION } from './version.js'
@@ -45,6 +47,8 @@ export function createServer(ctx: ToolContext): McpServer {
   )
 
   registerTools(server, ctx)
+  registerResources(server)
+  registerPrompts(server)
 
   return server
 }
