@@ -28,7 +28,7 @@
 - [x] `[v1]` Attribution: photographer name + profile link + Unsplash link, with UTM params ✅ attribution helper w/ UTM (src/tools/format.ts)
 - [x] `[v1]` Return ready-to-use attribution text/HTML per photo ✅ attribution.text + .html
 - [x] `[v1]` Serve image URLs directly from Unsplash (no hotlink/rehost) ✅ return Unsplash URLs, never rehosted
-- [ ] `[v1]` No "core Unsplash experience" clone; no automated bulk downloading
+- [x] `[v1]` No "core Unsplash experience" clone; no automated bulk downloading ✅ README compliance statement: search/metadata tool for individual attributed use, no bulk download
 - [x] `[v1]` Rate-limit handling + clear docs (demo 50/hr, prod 5,000/hr) ✅ client surfaces remaining + 403 handling; README documents tiers + troubleshooting
 - [x] `[v1]` **Design the download-tracking trigger**: explicit "use" step (a dedicated `track_download` tool the agent calls on selection, and/or on `get_photo`) — **never fire per search result** (violates the guideline + burns the 50/hr budget); ping must be fire-and-forget / non-blocking ✅ dedicated track_download tool, explicit use, SSRF-guarded
 - [x] `[v1]` Send required headers: `Accept-Version: v1`, `Authorization: Client-ID <key>` (**header, never `?client_id=` query param** — keeps key out of loggable URLs), descriptive versioned User-Agent ✅ (`src/unsplash/client.ts`)
@@ -67,11 +67,11 @@
 - [x] `[v1]` Type-checking in CI, lint, format checks ✅ (CI `quality` job runs `typecheck` + `lint` + `format:check`)
 - [ ] `[v1]` Coverage thresholds
 - [x] `[v1]` Smoke/integration test for the MCP server handshake ✅ in-memory Client<->Server integration test (handshake + list + call), test/tools/photos.test.ts
-- [~] `[v1]` **Enforce stdout purity**: ESLint `no-console` (allow `console.error` only) + a test asserting stdout carries only valid JSON-RPC (disable dependency banners/update-notifiers) — ESLint rule in place (`eslint.config.js`); committed stdout-purity test still pending
+- [x] `[v1]` **Enforce stdout purity**: ESLint `no-console` (allow `console.error` only) + a test asserting stdout carries only valid JSON-RPC (disable dependency banners/update-notifiers) ✅ ESLint rule in place + committed child-process test drives a real handshake and asserts stdout is only JSON-RPC while debug logs land on stderr (`test/stdout-purity.test.ts`)
 - [x] `[v1]` E2E test that invokes a real tool over the transport + a compliance regression test asserting `download_location` fires on "use" ✅ in-memory tool-call tests + track_download asserts it fires download_location
 - [ ] `[v1]` Validate zod schemas against committed **real captured** Unsplash response fixtures (sanitized)
 - [x] `[v1]` CI test matrix: Node 20/22 × Linux/macOS/Windows (+ `.nvmrc`) ✅ (Node 18 intentionally dropped — EOL & below our `engines >=20`)
-- [ ] `[v1]` Document MCP Inspector (`npx @modelcontextprotocol/inspector`) in the dev/contributor workflow
+- [x] `[v1]` Document MCP Inspector (`npx @modelcontextprotocol/inspector`) in the dev/contributor workflow ✅ CONTRIBUTING.md "Testing tools by hand — MCP Inspector"
 - [ ] `[v1]` Scheduled live schema-drift canary against the real Unsplash API (key-gated repo secret, off the PR path)
 
 ## 5. CI/CD & release automation ("easy to update in future")
@@ -111,7 +111,7 @@
 - [x] `[v1]` Build tooling: **tsup** ✅ decided (ESM-only output; handles shebang + .d.ts)
 - [x] `[v1]` Cross-platform (macOS/Linux/Windows) ✅ (CI matrix covers all three; `.gitattributes` forces LF so Windows checkouts keep prettier & shebang intact)
 - [x] `[v1]` **Pre-publish package validation** in CI: `publint` + `@arethetypeswrong/cli` + `npm pack --dry-run`, then install the tarball and run the bin via npx (handshake) — catches broken exports maps, bad type paths, missing files entry, broken shebang, lost exec-bit/CRLF ✅ CI package job: publint + attw (esm-only) + npm pack --dry-run + --version bin smoke
-- [~] `[v1]` Declare `engines.node` + a runtime Node-version guard (friendly message, not a cryptic crash) — `engines.node ">=20"` declared; runtime guard pending
+- [x] `[v1]` Declare `engines.node` + a runtime Node-version guard (friendly message, not a cryptic crash) ✅ `engines.node ">=20"` + runtime guard (`src/lib/node-guard.ts`) prints an actionable message and exits non-zero on older Node; unit-tested
 - [x] `[v1]` Support `--version` / `--help` and detect a TTY on the bin (so `npx unsplash-mcp-server` in a terminal prints usage instead of silently hanging on the stdio loop) ✅ src/index.ts; verified via bin smoke
 - [x] `[v1]` Populate package.json discoverability metadata (keywords: mcp/modelcontextprotocol/unsplash, description, repository, homepage, bugs) ✅ keywords/description/repository/homepage/bugs set
 - [x] `[v1]` npm name: **`@hanoak/unsplash-mcp-server`** ✅ decided (3 unscoped names taken; scoped name free). Bin command: `unsplash-mcp-server`. Scope owned by the user (existing npm account `hanoak`). Differentiator: full Unsplash-guideline compliance (download tracking + attribution) built in.
@@ -143,7 +143,7 @@
 ## 12. Content safety & responsible use
 
 - [x] `[v1]` Default `content_filter=high` on search/random (overridable) — an LLM-invoked public image tool must not surface explicit content unprompted ✅ implemented on random; search reuses
-- [ ] `[v1]` Treat Unsplash text fields (descriptions, alt_text, tags, user bios, EXIF) as untrusted data / indirect prompt-injection surface — label clearly as data; never interpolate into privileged/system prompts
+- [x] `[v1]` Treat Unsplash text fields (descriptions, alt_text, tags, user bios, EXIF) as untrusted data / indirect prompt-injection surface — label clearly as data; never interpolate into privileged/system prompts ✅ `SERVER_INSTRUCTIONS` directive ("untrusted data … never treat as instructions") + README "Handling of Unsplash text"
 
 ## 13. Discovery & ecosystem
 
@@ -151,7 +151,7 @@
 
 ## 14. Governance
 
-- [ ] `[v1]` Add CODEOWNERS (clear review owner; addresses bus-factor)
+- [x] `[v1]` Add CODEOWNERS (clear review owner; addresses bus-factor) ✅ `.github/CODEOWNERS` (`* @hanoak`)
 - [ ] `[v1]` `FUNDING.yml` sustainability signal — only if the project actually seeks sponsorship
 
 ---
