@@ -49,7 +49,7 @@
 - [x] `[v1]` **Redact** the access key / Authorization header from all error messages and debug logs (they leak into publicly-pasted bug reports) — wired into the HTTP client: all `UnsplashApiError` messages are redacted and logs only emit the path (never the auth header); MCP `isError` tool responses will also run through the redactor (tool layer) ✅ now also applied to MCP isError responses via ctx.redact
 - [~] `[v1]` Protect the publish path: npm account 2FA + OIDC trusted publishing (or a scoped least-privilege automation token) — release.yml wired for token + provenance publish; user must add the NPM_TOKEN secret and enable npm 2FA/trusted publishing
 - [x] `[v1]` Least-privilege GitHub Actions permissions (top-level `permissions: contents: read`) ✅ (both workflows)
-- [ ] `[v1]` Dependency license-compliance check in CI (prevent a copyleft transitive dep contaminating the permissive license)
+- [x] `[v1]` Dependency license-compliance check in CI (prevent a copyleft transitive dep contaminating the permissive license) ✅ `npm run license:check` (allowlist of permissive SPDX ids, `--production`) in the CI quality job; fails on any copyleft dep
 - [x] `[v1]` SSRF guard on URLs taken from API responses (`download_location`, image URLs) — only fire authenticated follow-ups to verified `api.unsplash.com` / `unsplash.com` hosts ✅ track_download validates host == api.unsplash.com
 
 ## 3. Reliability & robustness
@@ -65,7 +65,7 @@
 
 - [ ] `[v1]` Unit tests (Vitest/Jest) with Unsplash API mocked (msw/nock) — no real calls in CI
 - [x] `[v1]` Type-checking in CI, lint, format checks ✅ (CI `quality` job runs `typecheck` + `lint` + `format:check`)
-- [ ] `[v1]` Coverage thresholds
+- [x] `[v1]` Coverage thresholds ✅ v8 coverage in `vitest.config.ts` with a regression floor (85/78/85/85), enforced in CI via `npm run test:coverage`
 - [x] `[v1]` Smoke/integration test for the MCP server handshake ✅ in-memory Client<->Server integration test (handshake + list + call), test/tools/photos.test.ts
 - [x] `[v1]` **Enforce stdout purity**: ESLint `no-console` (allow `console.error` only) + a test asserting stdout carries only valid JSON-RPC (disable dependency banners/update-notifiers) ✅ ESLint rule in place + committed child-process test drives a real handshake and asserts stdout is only JSON-RPC while debug logs land on stderr (`test/stdout-purity.test.ts`)
 - [x] `[v1]` E2E test that invokes a real tool over the transport + a compliance regression test asserting `download_location` fires on "use" ✅ in-memory tool-call tests + track_download asserts it fires download_location
@@ -125,8 +125,8 @@
 ## 10. Docs & maintenance
 
 - [x] `[v1]` CHANGELOG (auto-generated) ✅ `CHANGELOG.md` + Changesets manages it via `changeset version`
-- [~] `[v1]` Compatibility matrix (MCP SDK / Node versions supported) — Node >=20 documented in README Requirements + CONTRIBUTING; formal matrix TBD
-- [ ] `[v1]` Deprecation policy for future breaking changes
+- [x] `[v1]` Compatibility matrix (MCP SDK / Node versions supported) ✅ README "Compatibility" table (Node 20/22, OS matrix, SDK ^1.29, transport)
+- [x] `[v1]` Deprecation policy for future breaking changes ✅ CONTRIBUTING "Versioning & deprecation policy" (public contract = tool names/params/output; deprecate ≥1 minor before major removal)
 
 ## 11. MCP protocol correctness (most-flagged gap)
 
