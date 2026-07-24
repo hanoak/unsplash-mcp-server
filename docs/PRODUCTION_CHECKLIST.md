@@ -138,7 +138,7 @@
 - [x] `[v1]` Keep tool `inputSchema`s flat and JSON-Schema-safe (no top-level unions/`anyOf`, no deep refinements — several clients choke on them) ✅ flat shape; verified converts to JSON Schema at runtime
 - [ ] `[post-v1]` Structured tool output via `outputSchema` + `structuredContent` (derived from the same zod schemas), with a text fallback — **deferred to post-v1**: tools already return the full result as JSON text, which every MCP client and the model consume today, so nothing is missing for a correct v1. `structuredContent`/`outputSchema` mainly benefit programmatic (non-LLM) consumers, which few clients read yet, and the full version couples every output shape to a zod schema (ongoing sync maintenance). Revisit when a real consumer needs typed output; at that point do the full version (declaring `outputSchema` without emitting `structuredContent` is not spec-correct).
 - [x] `[v1]` Honor MCP request cancellation (`notifications/cancelled` → `AbortController`) ✅ extra.signal passed through to client.get
-- [ ] `[v1]` Optional MCP Resources / Prompts (e.g. attribution-guide resource, "find a photo for X" prompt)
+- [x] `[v1]` Optional MCP Resources / Prompts (e.g. attribution-guide resource, "find a photo for X" prompt) ✅ `unsplash://guides/attribution` resource (`src/resources.ts`) + `find_photo` prompt (`src/prompts.ts`), registered in `createServer`; covered by `test/capabilities.test.ts`
 
 ## 12. Content safety & responsible use
 
