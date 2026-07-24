@@ -5,7 +5,7 @@
 > box (`[ ]` → `[x]`) as each item lands. Nothing here is "done" until it's tested.
 
 **Status legend:** `[ ]` not started · `[~]` in progress · `[x]` done
-**Scope:** every item is `[v1]` — all are in scope for the first npm publish.
+**Scope:** items are tagged `[v1]` (in scope for the first npm publish) or `[post-v1]` (consciously deferred, with the rationale noted inline).
 
 > This file is a build tracker kept in the repo **only until the first npm publish**,
 > then deleted (see the pre-publish reminder). It doubles as a public statement of the
@@ -136,7 +136,7 @@
 - [x] `[v1]` Namespace tool names (`unsplash_search_photos`, not `search_photos`) — avoids collisions in a client's flat tool namespace ✅ unsplash_random_photo
 - [x] `[v1]` Populate the server `instructions` field on initialize (hard-wire: always surface attribution; call download-tracking on selection) ✅ `SERVER_INSTRUCTIONS` in `src/server.ts`; verified via `client.getInstructions()`
 - [x] `[v1]` Keep tool `inputSchema`s flat and JSON-Schema-safe (no top-level unions/`anyOf`, no deep refinements — several clients choke on them) ✅ flat shape; verified converts to JSON Schema at runtime
-- [ ] `[v1]` Structured tool output via `outputSchema` + `structuredContent` (derived from the same zod schemas), with a text fallback
+- [ ] `[post-v1]` Structured tool output via `outputSchema` + `structuredContent` (derived from the same zod schemas), with a text fallback — **deferred to post-v1**: tools already return the full result as JSON text, which every MCP client and the model consume today, so nothing is missing for a correct v1. `structuredContent`/`outputSchema` mainly benefit programmatic (non-LLM) consumers, which few clients read yet, and the full version couples every output shape to a zod schema (ongoing sync maintenance). Revisit when a real consumer needs typed output; at that point do the full version (declaring `outputSchema` without emitting `structuredContent` is not spec-correct).
 - [x] `[v1]` Honor MCP request cancellation (`notifications/cancelled` → `AbortController`) ✅ extra.signal passed through to client.get
 - [ ] `[v1]` Optional MCP Resources / Prompts (e.g. attribution-guide resource, "find a photo for X" prompt)
 
