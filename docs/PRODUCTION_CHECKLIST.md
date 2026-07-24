@@ -7,6 +7,8 @@
 **Status legend:** `[ ]` not started · `[~]` in progress · `[x]` done
 **Scope:** items are tagged `[v1]` (in scope for the first npm publish) or `[post-v1]` (consciously deferred, with the rationale noted inline).
 
+**Release roadmap:** **v1** = current scope (public read-only tools + hardening) · **v2** = OAuth write/`me` endpoints · **v3** = `.mcpb` Desktop Extension.
+
 > This file is a build tracker kept in the repo **only until the first npm publish**,
 > then deleted (see the pre-publish reminder). It doubles as a public statement of the
 > project's quality bar while we build.
@@ -115,7 +117,7 @@
 - [x] `[v1]` Support `--version` / `--help` and detect a TTY on the bin (so `npx unsplash-mcp-server` in a terminal prints usage instead of silently hanging on the stdio loop) ✅ src/index.ts; verified via bin smoke
 - [x] `[v1]` Populate package.json discoverability metadata (keywords: mcp/modelcontextprotocol/unsplash, description, repository, homepage, bugs) ✅ keywords/description/repository/homepage/bugs set
 - [x] `[v1]` npm name: **`@hanoak/unsplash-mcp-server`** ✅ decided (3 unscoped names taken; scoped name free). Bin command: `unsplash-mcp-server`. Scope owned by the user (existing npm account `hanoak`). Differentiator: full Unsplash-guideline compliance (download tracking + attribution) built in.
-- [ ] `[v1]` Ship a Desktop Extension (`.mcpb`) bundle for one-click Claude Desktop install
+- [ ] `[post-v1]` Ship a Desktop Extension (`.mcpb`) bundle for one-click Claude Desktop install — **planned for v3** (release roadmap: v1 = current scope, v2 = OAuth write/`me` endpoints, v3 = `.mcpb`). Highest adoption lever; a manifest + `mcpb pack` step.
 
 ## 9. Observability (lightweight)
 
