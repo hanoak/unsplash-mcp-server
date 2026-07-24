@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { CollectionSchema } from '../schemas/collection.js'
 import { parseResponse } from '../schemas/parse.js'
 import { PhotoSchema } from '../schemas/photo.js'
-import { toCompactCollection, toCompactPhoto } from './format.js'
+import { IMAGE_URL_HINT, toCompactCollection, toCompactPhoto } from './format.js'
 import type { ToolContext } from './index.js'
 import { toJsonResult, toToolError } from './result.js'
 
@@ -90,7 +90,8 @@ export function registerCollectionTools(server: McpServer, ctx: ToolContext): vo
       title: 'Unsplash Collection Photos',
       description:
         'List the photos in a collection (paginated), with URLs and ready-to-use attribution. ' +
-        'Read-only.',
+        'Read-only.' +
+        IMAGE_URL_HINT,
       inputSchema: collectionPhotosInput,
       annotations: READ_ONLY,
     },

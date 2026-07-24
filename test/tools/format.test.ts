@@ -63,7 +63,9 @@ describe('toCompactPhoto', () => {
     const c = toCompactPhoto(photo, 'app')
     expect(c.id).toBe('abc123')
     expect(c.description).toBe('a cat on a sofa') // falls back to alt_description
+    expect(c.urls.raw).toBe('https://images.unsplash.com/raw') // imgix base for custom sizing
     expect(c.urls.regular).toBe('https://images.unsplash.com/regular')
+    expect(c.urls.thumb).toBe('https://images.unsplash.com/thumb')
     expect(c.download_location).toBe('https://api.unsplash.com/photos/abc123/download')
     expect(c.photographer.username).toBe('janedoe')
     expect(c.attribution.text).toBe('Photo by Jane Doe on Unsplash')

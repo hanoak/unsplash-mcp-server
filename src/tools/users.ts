@@ -5,7 +5,7 @@ import { CollectionSchema } from '../schemas/collection.js'
 import { parseResponse } from '../schemas/parse.js'
 import { PhotoSchema } from '../schemas/photo.js'
 import { UserSchema, UserStatisticsSchema } from '../schemas/user.js'
-import { toCompactCollection, toCompactPhoto, toCompactUser } from './format.js'
+import { IMAGE_URL_HINT, toCompactCollection, toCompactPhoto, toCompactUser } from './format.js'
 import type { ToolContext } from './index.js'
 import { toJsonResult, toToolError } from './result.js'
 
@@ -71,7 +71,8 @@ export function registerUserTools(server: McpServer, ctx: ToolContext): void {
     {
       title: 'Unsplash User Photos',
       description:
-        "List a user's photos (paginated), with URLs and ready-to-use attribution. Read-only.",
+        "List a user's photos (paginated), with URLs and ready-to-use attribution. Read-only." +
+        IMAGE_URL_HINT,
       inputSchema: userPhotosInput,
       annotations: READ_ONLY,
     },

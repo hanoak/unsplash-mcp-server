@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { parseResponse } from '../schemas/parse.js'
 import { DownloadLinkSchema, PhotoSchema, PhotoStatisticsSchema } from '../schemas/photo.js'
 import { UnsplashApiError } from '../unsplash/errors.js'
-import { toCompactPhoto } from './format.js'
+import { IMAGE_URL_HINT, toCompactPhoto } from './format.js'
 import type { ToolContext } from './index.js'
 import { toJsonResult, toToolError } from './result.js'
 
@@ -89,7 +89,8 @@ export function registerPhotoTools(server: McpServer, ctx: ToolContext): void {
         'Fetch a single random photo from Unsplash. Optionally filter by search term, ' +
         'orientation, collections, topics, or user. Returns photo URLs, dimensions, color, ' +
         'and ready-to-use attribution (text + HTML). Content is filtered to "high" safety by ' +
-        'default. Read-only.',
+        'default. Read-only.' +
+        IMAGE_URL_HINT,
       inputSchema: randomPhotoInput,
       annotations: READ_ONLY,
     },
@@ -123,7 +124,8 @@ export function registerPhotoTools(server: McpServer, ctx: ToolContext): void {
       title: 'List Unsplash Photos',
       description:
         'List the latest featured Unsplash photos (paginated). Returns compact photo objects ' +
-        'with URLs and ready-to-use attribution. Read-only.',
+        'with URLs and ready-to-use attribution. Read-only.' +
+        IMAGE_URL_HINT,
       inputSchema: listPhotosInput,
       annotations: READ_ONLY,
     },
@@ -154,7 +156,8 @@ export function registerPhotoTools(server: McpServer, ctx: ToolContext): void {
       title: 'Get Unsplash Photo',
       description:
         'Get a single Unsplash photo by its ID or slug, with full detail, URLs, and ' +
-        'ready-to-use attribution. Read-only.',
+        'ready-to-use attribution. Read-only.' +
+        IMAGE_URL_HINT,
       inputSchema: getPhotoInput,
       annotations: READ_ONLY,
     },
