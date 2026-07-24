@@ -37,8 +37,9 @@ export const SERVER_INSTRUCTIONS = [
 ].join('\n')
 
 /**
- * Build the MCP server and register its tools against the injected context.
- * Pure and dependency-injected — tests pass a fake client via `ctx`.
+ * Build the MCP server and register its tools, resources, and prompts against
+ * the injected context. Pure and dependency-injected — tests pass a fake client
+ * via `ctx`.
  */
 export function createServer(ctx: ToolContext): McpServer {
   const server = new McpServer(
