@@ -6,6 +6,14 @@ import type { User } from '../schemas/user.js'
 const UNSPLASH_BASE = 'https://unsplash.com'
 const DEFAULT_UTM_SOURCE = 'unsplash_mcp_server'
 
+/**
+ * Appended to photo-returning tool descriptions: how to get a custom size from
+ * the `raw` imgix base (Unsplash also provides fixed `full`/`regular`/`small`/`thumb`).
+ */
+export const IMAGE_URL_HINT =
+  ' Each photo includes a `raw` imgix base URL — append params for a custom size/format, ' +
+  'e.g. `?w=800&h=600&q=80&fm=webp&fit=crop` — plus fixed `full`/`regular`/`small`/`thumb` sizes.'
+
 /** Ready-to-use attribution, per Unsplash API guidelines (with UTM params). */
 export interface Attribution {
   /** Plain-text credit, e.g. `Photo by Jane Doe on Unsplash`. */
@@ -26,9 +34,12 @@ export interface CompactPhoto {
   readonly color: string | null
   readonly blur_hash: string | null
   readonly urls: {
+    /** imgix base URL — append `?w=&h=&q=&fm=&fit=` for a custom size/format. */
+    readonly raw: string | undefined
     readonly full: string | undefined
     readonly regular: string | undefined
     readonly small: string | undefined
+    readonly thumb: string | undefined
   }
   readonly photo_page: string | undefined
   /** Call `unsplash_track_download` with this to comply with the download guideline. */
@@ -82,9 +93,11 @@ export function toCompactPhoto(photo: Photo, appName: string | undefined): Compa
     color: photo.color ?? null,
     blur_hash: photo.blur_hash ?? null,
     urls: {
+      raw: photo.urls?.raw,
       full: photo.urls?.full,
       regular: photo.urls?.regular,
       small: photo.urls?.small,
+      thumb: photo.urls?.thumb,
     },
     photo_page: photo.links?.html,
     download_location: photo.links?.download_location,

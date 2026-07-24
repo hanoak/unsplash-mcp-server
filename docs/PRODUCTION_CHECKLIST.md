@@ -102,7 +102,7 @@
 - [x] `[v1]` Pagination support ✅ list_photos page/per_page
 - [x] `[v1]` **Clamp/normalize params to Unsplash bounds**: `per_page` & random `count` ≤30, `page` ≥1, zod enums for orientation/order_by/color, URL-encode queries; cap returned item count ✅ per_page/quantity clamped to 30, page>=1, zod enums, path encoded
 - [x] `[v1]` Return **hotlinkable image URLs + metadata as text, never base64 image blobs** (base64 balloons tokens + edges into rehosting) ✅ toCompactPhoto returns URLs as text
-- [ ] `[v1]` Offer sized image URLs via imgix params (`w`/`h`/`q`/`fm`/`fit`) or sensible size defaults instead of full-res raw URLs
+- [x] `[v1]` Offer sized image URLs via imgix params (`w`/`h`/`q`/`fm`/`fit`) or sensible size defaults instead of full-res raw URLs ✅ output exposes the `raw` imgix base + fixed `full`/`regular`/`small`/`thumb` sizes; photo tool descriptions note how to build a custom size from `raw`
 
 ## 8. Distribution & runtime
 
