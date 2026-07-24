@@ -9,6 +9,9 @@ All notable changes to this project are documented here. The format is based on 
 - Initial MCP server for the Unsplash API over stdio.
 - **21 tools** across photos, search, users, collections, topics, and stats (read-only, plus `unsplash_track_download`).
 - Built-in Unsplash compliance: ready-to-use attribution (plain text + UTM-tagged HTML), a dedicated `unsplash_track_download` tool, and server `instructions` that nudge clients to attribute and track downloads correctly.
+- An MCP `unsplash://guides/attribution` resource and a `find_photo` prompt (subject + optional orientation).
 - `content_filter=high` default on search and random photos.
+- Image URLs expose `raw`/`full`/`regular`/`small`/`thumb` sizes, plus a `raw` imgix base for custom sizing.
 - Robust HTTP client: required headers, request timeouts, retries/backoff (including `403` hourly-limit handling), rate-limit surfacing, and access-key redaction in all error output.
 - Lenient zod response schemas; failures returned as MCP `isError` results rather than thrown protocol errors.
+- Fail-fast startup validation with actionable messages (missing `UNSPLASH_ACCESS_KEY`, unsupported Node.js) plus `--version`/`--help` CLI flags.

@@ -15,14 +15,16 @@ cp .env.example .env # then add your UNSPLASH_ACCESS_KEY
 
 ### Scripts
 
-| Command             | What it does                                           |
-| ------------------- | ------------------------------------------------------ |
-| `npm run build`     | Bundle to `dist/` with tsup (ESM + shebang + `.d.ts`). |
-| `npm run typecheck` | `tsc --noEmit` (strict).                               |
-| `npm run lint`      | ESLint (flat config).                                  |
-| `npm run format`    | Prettier write.                                        |
-| `npm test`          | Vitest (unit + in-memory MCP integration tests).       |
-| `npm run check`     | typecheck + lint + format:check + test (the CI gate).  |
+| Command                 | What it does                                                    |
+| ----------------------- | --------------------------------------------------------------- |
+| `npm run build`         | Bundle to `dist/` with tsup (ESM + shebang + `.d.ts`).          |
+| `npm run typecheck`     | `tsc --noEmit` (strict).                                        |
+| `npm run lint`          | ESLint (flat config).                                           |
+| `npm run format`        | Prettier write.                                                 |
+| `npm test`              | Vitest (unit + in-memory MCP integration tests).                |
+| `npm run test:coverage` | Vitest with v8 coverage + thresholds (the coverage gate).       |
+| `npm run license:check` | Fail if any production dependency has a non-permissive license. |
+| `npm run check`         | typecheck + lint + format:check + test (core local gate).       |
 
 ### Testing tools by hand — MCP Inspector
 
@@ -47,7 +49,7 @@ Connect, open the **Tools** tab, and run any tool. Server logs (stderr) appear i
 
 - **Conventional Commits** are enforced by a `commit-msg` hook (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`, `test:`, `ci:` …).
 - A `pre-commit` hook runs gitleaks + `lint-staged` (Prettier + ESLint on staged files) and blocks direct commits to `main`.
-- Open pull requests against `main`; CI (lint, typecheck, format, tests on Node 20/22 × Linux/macOS/Windows, plus a secret scan) must pass.
+- Open pull requests against `main`; CI must pass — lint, typecheck, format, coverage thresholds, a dependency-license check, package validation (`publint` + `attw` + tarball), tests on Node 20/22 × Linux/macOS/Windows, and a gitleaks secret scan.
 
 ## Versioning & deprecation policy
 
