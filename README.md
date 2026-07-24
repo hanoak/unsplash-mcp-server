@@ -15,6 +15,7 @@ A production-ready [Model Context Protocol](https://modelcontextprotocol.io) (MC
 - **21 tools** across photos, search, users, collections, topics, and stats.
 - **Compliance built in** — every photo comes with ready-to-use attribution (plain text + UTM-tagged HTML), and a dedicated `unsplash_track_download` tool for the download-tracking guideline.
 - **Content safety** — `content_filter=high` by default on search and random photos.
+- **Flexible image URLs** — each photo returns `raw`/`full`/`regular`/`small`/`thumb` sizes, plus a `raw` imgix base for custom sizes (`?w=&h=&q=&fm=&fit=`).
 - **Robust** — typed failures returned as MCP `isError` results the model can recover from, plus retries/backoff, timeouts, and rate-limit surfacing.
 - **Lean & modern** — ESM, Node 20+, zero-install via `npx`, no telemetry.
 
