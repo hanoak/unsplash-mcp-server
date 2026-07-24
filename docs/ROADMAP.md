@@ -1,17 +1,33 @@
-# Production Readiness Checklist
+# unsplash-mcp-server — status & roadmap
 
-> Living reference for building `unsplash-mcp-server` into a real, production-ready,
-> open-source npm package. We work through these **one by one**. Update the status
-> box (`[ ]` → `[x]`) as each item lands. Nothing here is "done" until it's tested.
+What has shipped and what's planned next. The **roadmap** below covers upcoming releases; the detailed **v1 implementation checklist** — everything built and verified for the first release — is preserved beneath it as the record of what shipped.
 
-**Status legend:** `[ ]` not started · `[~]` in progress · `[x]` done
-**Scope:** items are tagged `[v1]` (in scope for the first npm publish) or `[post-v1]` (consciously deferred, with the rationale noted inline).
+## Roadmap
 
-**Release roadmap:** **v1** = current scope (public read-only tools + hardening) · **v2** = OAuth write/`me` endpoints · **v3** = `.mcpb` Desktop Extension.
+### ✅ v1 — current release
 
-> This file is a build tracker kept in the repo **only until the first npm publish**,
-> then deleted (see the pre-publish reminder). It doubles as a public statement of the
-> project's quality bar while we build.
+The public, read-only surface plus production hardening: **21 tools** across photos, search, users, collections, topics, and stats; an `unsplash://guides/attribution` resource and a `find_photo` prompt; built-in Unsplash-guideline compliance (ready-to-use attribution + download tracking); a robust retrying HTTP client; and CI quality gates (coverage, dependency-license, package validation). Full detail in the checklist below.
+
+### v2 — OAuth write / `me` endpoints
+
+The 8 tier-2 endpoints that require the Unsplash **OAuth authorization-code flow** (user access tokens + scopes) — not possible with the Client-ID access key alone:
+
+- `GET /me`, `PUT /me`
+- `POST /collections`, `PUT /collections/{id}`, `DELETE /collections/{id}`, `POST /collections/{id}/add`, `DELETE /collections/{id}/remove`
+- `PUT /photos/{id}`
+
+### v3 — `.mcpb` Desktop Extension
+
+A Desktop Extension bundle (a manifest + `mcpb pack`) for **one-click install in Claude Desktop** — no manual JSON config editing. The strongest adoption / discoverability lever.
+
+---
+
+## v1 implementation checklist
+
+Everything below was built and verified for the first release; the few remaining `[ ]`/`[~]` items are release-time steps or deferred to the roadmap above.
+
+**Status legend:** `[ ]` not started · `[~]` in progress (release-time) · `[x]` done
+**Tags:** `[v1]` in the first release · `[post-v1]` deferred (see Roadmap).
 
 ---
 
