@@ -1,11 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  parseResponse,
-  PhotoSchema,
-  SchemaValidationError,
-  SearchPhotosResponseSchema,
-} from '../../src/schemas/index.js'
+import { parseResponse, SchemaValidationError } from '../../src/schemas/parse.js'
+import { PhotoSchema, SearchPhotosResponseSchema } from '../../src/schemas/photo.js'
 
 const photoFixture = {
   id: 'abc123',
