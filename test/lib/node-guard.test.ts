@@ -1,3 +1,5 @@
+import { createRequire } from 'node:module'
+
 import { describe, expect, it } from 'vitest'
 
 import { MIN_NODE_MAJOR, nodeVersionError } from '../../src/lib/node-guard.js'
@@ -28,5 +30,18 @@ describe('nodeVersionError', () => {
 
   it('does not block on an unrecognised version string', () => {
     expect(nodeVersionError('not-a-version')).toBeNull()
+  })
+})
+
+describe('MIN_NODE_MAJOR', () => {
+  it('stays in sync with package.json engines.node', () => {
+    // package.json is the documented source of truth (and the range npm
+    // enforces at install). The guard mirrors it; this asserts the mirror is
+    // accurate so the two can never drift silently.
+    const pkg = createRequire(import.meta.url)('../../package.json') as {
+      engines?: { node?: string }
+    }
+    const declaredMajor = Number.parseInt(pkg.engines?.node?.match(/\d+/)?.[0] ?? '', 10)
+    expect(declaredMajor).toBe(MIN_NODE_MAJOR)
   })
 })
