@@ -49,9 +49,11 @@ Connect, open the **Tools** tab, and run any tool. Server logs (stderr) appear i
 - A `pre-commit` hook runs gitleaks + `lint-staged` (Prettier + ESLint on staged files) and blocks direct commits to `main`.
 - Open pull requests against `main`; CI (lint, typecheck, format, tests on Node 20/22 × Linux/macOS/Windows, plus a secret scan) must pass.
 
-## Versioning
+## Versioning & deprecation policy
 
-This project follows [Semantic Versioning](https://semver.org). Tool names and output shapes are treated as part of the public contract.
+This project follows [Semantic Versioning](https://semver.org). **Tool names, input parameters, and output shapes are part of the public contract** — an incompatible change to any of them ships only in a **major** release.
+
+When something must change incompatibly, we deprecate before removing: the old behaviour is kept for at least one subsequent **minor** release, called out in the `CHANGELOG`, and — where possible — flagged in the tool description or via a runtime warning that points to the replacement. Removal then happens in the next major. Additive changes (new tools, new optional fields) are minor and backwards-compatible.
 
 ## Code of Conduct
 

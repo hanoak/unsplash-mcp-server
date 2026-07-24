@@ -99,6 +99,15 @@ This server **collects nothing and phones home to no one**. It contacts only `ap
 - **Node.js >= 20** (Node 18 is end-of-life).
 - An Unsplash API access key.
 
+## Compatibility
+
+| Component | Supported                                                                                            |
+| --------- | ---------------------------------------------------------------------------------------------------- |
+| Node.js   | **20** and **22**, tested in CI; `>=20` required (enforced by `engines` and a runtime guard).        |
+| OS        | Linux, macOS, and Windows (all tested in CI).                                                        |
+| MCP SDK   | `@modelcontextprotocol/sdk` `^1.29`; the protocol version is negotiated with your client on connect. |
+| Transport | stdio (HTTP/SSE may be added in a future release).                                                   |
+
 ## Contributing
 
 Contributions are welcome — see [CONTRIBUTING.md](./CONTRIBUTING.md) and our [Code of Conduct](./CODE_OF_CONDUCT.md). To report a vulnerability, see [SECURITY.md](./SECURITY.md).
