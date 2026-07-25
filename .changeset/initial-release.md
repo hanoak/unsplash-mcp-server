@@ -1,5 +1,5 @@
 ---
-'@hanoak/unsplash-mcp-server': minor
+'@hanoak/unsplash-mcp-server': major
 ---
 
 Initial release: a Model Context Protocol (MCP) server for the Unsplash API.
