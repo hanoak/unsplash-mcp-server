@@ -1,0 +1,22 @@
+# Smithery configuration: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+
+configSchema:
+  # JSON Schema for the options Smithery collects from the user.
+  type: object
+  required:
+    - unsplashAccessKey
+  properties:
+    unsplashAccessKey:
+      type: string
+      description: Your Unsplash API access key (used as the Authorization Client-ID header).
+    unsplashAppName:
+      type: string
+      description: Registered Unsplash app name, used as the attribution utm_source.
+
+commandFunction:
+  # Produces the CLI command to start the MCP server on stdio.
+  |-
+  (config) => ({ command: 'npx', args: ['-y', '@hanoak/unsplash-mcp-server'], env: { UNSPLASH_ACCESS_KEY: config.unsplashAccessKey, ...(config.unsplashAppName ? { UNSPLASH_APP_NAME: config.unsplashAppName } : {}) } })
