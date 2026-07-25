@@ -1,6 +1,7 @@
 {
   "name": "@hanoak/unsplash-mcp-server",
   "version": "1.0.0",
+  "mcpName": "io.github.hanoak/unsplash-mcp-server",
   "description": "Production-ready Model Context Protocol (MCP) server for the Unsplash API — search photos, fetch details, and stay compliant with Unsplash attribution & download-tracking guidelines. Unofficial; not affiliated with or endorsed by Unsplash.",
   "keywords": [
     "mcp",
