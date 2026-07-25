@@ -167,7 +167,7 @@ Everything below was built and verified for the first release; the few remaining
 
 ## 13. Discovery & ecosystem
 
-- [ ] `[v1]` List on the official MCP registry (`server.json` manifest) + community catalogs (awesome-mcp, Smithery, Glama, mcp.so) — the main way people discover MCP servers
+- [x] `[v1]` List on the official MCP registry (`server.json` manifest) + community catalogs — the main way people discover MCP servers ✅ published to the official registry as `io.github.hanoak/unsplash-mcp-server`; listed on Glama (`glama.json`), awesome-mcp-servers, mcp.so, and PulseMCP. **Smithery deferred to v3**: its onboarding now needs a hosted HTTPS URL or a local `.mcpb` bundle, which the v3 `.mcpb` will provide.
 
 ## 14. Governance
 
