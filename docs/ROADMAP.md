@@ -34,7 +34,7 @@ Everything below was built and verified for the first release; the few remaining
 ## 0. Core stack decisions (foundational)
 
 - [x] `[v1]` Language/runtime: **TypeScript + Node** ✅ decided
-- [x] `[v1]` Runtime validation with **zod** (tool inputs _and_ Unsplash API responses) ✅ response schemas in `src/schemas/`; tool-input schemas on all 8 tools (photos + search)
+- [x] `[v1]` Runtime validation with **zod** (tool inputs _and_ Unsplash API responses) ✅ response schemas in `src/schemas/`; tool-input schemas on all 21 tools
 - [x] `[v1]` Transport: **stdio** first (HTTP/SSE possible later) ✅ decided
 - [x] `[v1]` Module format: **ESM-only** ✅ decided (MCP SDK is ESM; simplest for a bin package)
 - [x] `[v1]` Node version target: **Node 20+** ✅ decided (Node 18 is EOL Apr 2025)
@@ -115,7 +115,7 @@ Everything below was built and verified for the first release; the few remaining
 ## 7. API surface / DX of the server
 
 - [x] `[v1]` Decide tool set (search photos, get photo, random, collections, user, topics, stats…) ✅ 21 read endpoints for v1; 8 OAuth deferred
-- [x] `[v1]` Consistent, well-described tool schemas (descriptions matter — LLM reads them) ✅ all 5 photos tools + inputs described
+- [x] `[v1]` Consistent, well-described tool schemas (descriptions matter — LLM reads them) ✅ all 21 tools have described input schemas
 - [x] `[v1]` Token-efficient output shape (trim huge Unsplash responses) ✅ toCompactPhoto + compact stats
 - [x] `[v1]` Pagination support ✅ list_photos page/per_page
 - [x] `[v1]` **Clamp/normalize params to Unsplash bounds**: `per_page` & random `count` ≤30, `page` ≥1, zod enums for orientation/order_by/color, URL-encode queries; cap returned item count ✅ per_page/quantity clamped to 30, page>=1, zod enums, path encoded
