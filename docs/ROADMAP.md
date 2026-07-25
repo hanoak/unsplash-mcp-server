@@ -16,9 +16,11 @@ The 8 tier-2 endpoints that require the Unsplash **OAuth authorization-code flow
 - `POST /collections`, `PUT /collections/{id}`, `DELETE /collections/{id}`, `POST /collections/{id}/add`, `DELETE /collections/{id}/remove`
 - `PUT /photos/{id}`
 
-### v3 — `.mcpb` Desktop Extension
+### v3 — `.mcpb` Desktop Extension + more prompts
 
 A Desktop Extension bundle (a manifest + `mcpb pack`) for **one-click install in Claude Desktop** — no manual JSON config editing. The strongest adoption / discoverability lever.
+
+**Expand the MCP prompt library.** v1 ships a single `find_photo` prompt. Add more server prompts for common Unsplash workflows (e.g. building an attributed gallery, finding photos by color/mood, assembling a themed collection) so clients get more ready-made entry points.
 
 ---
 
