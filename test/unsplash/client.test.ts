@@ -214,3 +214,64 @@ describe('UnsplashClient.get', () => {
     expect(calls.length).toBe(1)
   })
 })
+
+describe('UnsplashClient mutation methods', () => {
+  it('post() sends a JSON body with Content-Type and Client-ID auth by default', async () => {
+    const { fn, calls } = fakeFetch(() => jsonResponse({ id: 'coll_1' }, { status: 201 }))
+    const client = new UnsplashClient(config, { fetch: fn, sleep: noopSleep })
+
+    const res = await client.post<{ id: string }>('/collections', { title: 'Nature' })
+
+    expect(res.data).toEqual({ id: 'coll_1' })
+    const { init } = calls[0]!
+    expect(init.method).toBe('POST')
+    expect(init.body).toBe(JSON.stringify({ title: 'Nature' }))
+    const headers = new Headers(init.headers)
+    expect(headers.get('content-type')).toBe('application/json')
+    expect(headers.get('authorization')).toBe('Client-ID test-access-key-123')
+  })
+
+  it('put() sends Authorization: Bearer when authToken is provided', async () => {
+    const { fn, calls } = fakeFetch(() => jsonResponse({ id: 'me' }))
+    const client = new UnsplashClient(config, { fetch: fn, sleep: noopSleep })
+
+    await client.put('/me', { bio: 'hi' }, { authToken: 'user-token-abc' })
+
+    const headers = new Headers(calls[0]!.init.headers)
+    expect(headers.get('authorization')).toBe('Bearer user-token-abc')
+  })
+
+  it('delete() tolerates an empty 204 response body', async () => {
+    const { fn, calls } = fakeFetch(() => new Response(null, { status: 204 }))
+    const client = new UnsplashClient(config, { fetch: fn, sleep: noopSleep })
+
+    const res = await client.delete('/collections/1', { authToken: 'user-token-abc' })
+
+    expect(res.data).toBeUndefined()
+    expect(calls[0]!.init.method).toBe('DELETE')
+  })
+
+  it('delete() with query params builds the URL correctly', async () => {
+    const { fn, calls } = fakeFetch(() => jsonResponse({ ok: true }))
+    const client = new UnsplashClient(config, { fetch: fn, sleep: noopSleep })
+
+    await client.delete('/collections/1/remove', { params: { photo_id: 'abc' } })
+
+    const url = new URL(calls[0]!.url)
+    expect(url.pathname).toBe('/collections/1/remove')
+    expect(url.searchParams.get('photo_id')).toBe('abc')
+  })
+
+  it('retries a mutating request on a 5xx like get() does', async () => {
+    const responses = [
+      jsonResponse({}, { status: 503 }),
+      jsonResponse({ ok: true }, { status: 201 }),
+    ]
+    const { fn, calls } = fakeFetch((i) => responses[i]!)
+    const client = new UnsplashClient(config, { fetch: fn, sleep: noopSleep, maxRetries: 2 })
+
+    const res = await client.post<{ ok: boolean }>('/collections', { title: 'x' })
+    expect(res.data).toEqual({ ok: true })
+    expect(calls.length).toBe(2)
+  })
+})
