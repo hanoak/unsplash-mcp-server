@@ -29,10 +29,33 @@ export function fakeFetch(responder: () => Response) {
   return { fn, calls }
 }
 
+export interface RecordedCall {
+  readonly url: string
+  readonly init: RequestInit
+}
+
+/** Like {@link fakeFetch}, but also records method/headers/body — for write-tool tests. */
+export function fakeFetchDetailed(responder: () => Response | Promise<Response>) {
+  const calls: RecordedCall[] = []
+  const fn = (async (input: string | URL | Request, init?: RequestInit) => {
+    calls.push({ url: String(input), init: init ?? {} })
+    return responder()
+  }) as unknown as typeof fetch
+  return { fn, calls }
+}
+
 /** Spin up a real MCP Client wired to our server over in-memory transports. */
-export async function connect(fetchImpl: typeof fetch): Promise<Client> {
+export async function connect(
+  fetchImpl: typeof fetch,
+  options: { userToken?: string } = {},
+): Promise<Client> {
   const client = new UnsplashClient(testConfig, { fetch: fetchImpl, sleep: async () => {} })
-  const server = createServer({ client, config: testConfig, redact: (s) => s })
+  const server = createServer({
+    client,
+    config: testConfig,
+    redact: (s) => s,
+    ...(options.userToken ? { userToken: options.userToken } : {}),
+  })
   const mcpClient = new Client({ name: 'test', version: '0.0.0' })
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
   await server.connect(serverTransport)

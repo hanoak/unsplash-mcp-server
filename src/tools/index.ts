@@ -3,6 +3,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { Config } from '../config.js'
 import type { UnsplashClient } from '../unsplash/client.js'
 import { registerCollectionTools } from './collections.js'
+import { registerMeTools } from './me.js'
 import { registerPhotoTools } from './photos.js'
 import { registerSearchTools } from './search.js'
 import { registerStatsTools } from './stats.js'
@@ -35,4 +36,5 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
   registerCollectionTools(server, ctx)
   registerTopicTools(server, ctx)
   registerStatsTools(server, ctx)
+  registerMeTools(server, ctx)
 }
