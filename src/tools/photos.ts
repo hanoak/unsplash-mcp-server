@@ -6,12 +6,14 @@ import { DownloadLinkSchema, PhotoSchema, PhotoStatisticsSchema } from '../schem
 import { UnsplashApiError } from '../unsplash/errors.js'
 import { IMAGE_URL_HINT, toCompactPhoto } from './format.js'
 import type { ToolContext } from './index.js'
-import { toJsonResult, toToolError } from './result.js'
+import { requireUserToken, toJsonResult, toToolError } from './result.js'
 
 const MAX_PER_PAGE = 30
 const MAX_STATS_DAYS = 30
 // SSRF guard: only ever fire an authenticated request at Unsplash's own host.
 const ALLOWED_DOWNLOAD_HOSTS = new Set(['api.unsplash.com'])
+const LOGIN_NOTE =
+  ' Requires OAuth sign-in — run `npx @hanoak/unsplash-mcp-server login` first. Not read-only.'
 
 const randomPhotoInput = {
   query: z
@@ -64,6 +66,40 @@ const photoStatisticsInput = {
     .min(1)
     .default(30)
     .describe('Number of days of statistics to return (clamped to a max of 30).'),
+}
+
+const updatePhotoInput = {
+  id: z.string().trim().min(1).describe('The Unsplash photo ID or slug.'),
+  show_on_profile: z
+    .boolean()
+    .optional()
+    .describe("Whether the photo shows on the owner's profile."),
+  description: z.string().trim().min(1).optional().describe('New photo description.'),
+  tags: z
+    .array(z.string().trim().min(1))
+    .optional()
+    .describe('New list of tags for the photo (replaces the existing tags).'),
+  location: z
+    .object({
+      city: z.string().optional(),
+      country: z.string().optional(),
+      name: z.string().optional().describe('Full location string, e.g. "Paris, France".'),
+      latitude: z.number().optional(),
+      longitude: z.number().optional(),
+    })
+    .optional()
+    .describe('New location metadata.'),
+  exif: z
+    .object({
+      make: z.string().optional().describe('Camera make, e.g. "Canon".'),
+      model: z.string().optional().describe('Camera model, e.g. "EOS 5D Mark IV".'),
+      exposure_time: z.string().optional().describe('Exposure time, e.g. "1/500".'),
+      aperture_value: z.number().optional(),
+      focal_length: z.number().optional(),
+      iso_speed_ratings: z.number().optional(),
+    })
+    .optional()
+    .describe('New EXIF metadata.'),
 }
 
 const trackDownloadInput = {
@@ -238,6 +274,36 @@ export function registerPhotoTools(server: McpServer, ctx: ToolContext): void {
         const res = await ctx.client.get(url.pathname + url.search, { signal: extra.signal })
         const link = parseResponse(DownloadLinkSchema, res.data, 'track download')
         return toJsonResult({ tracked: true, download_url: link.url, rate_limit: res.rateLimit })
+      } catch (error) {
+        return toToolError(error, ctx.redact)
+      }
+    },
+  )
+
+  server.registerTool(
+    'unsplash_update_photo',
+    {
+      title: 'Update Unsplash Photo',
+      description:
+        'Update metadata on a photo owned by the authenticated user (description, tags, ' +
+        'location, EXIF, profile visibility). Only the fields you pass are changed.' +
+        LOGIN_NOTE,
+      inputSchema: updatePhotoInput,
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
+    },
+    async (args, extra) => {
+      try {
+        const authToken = requireUserToken(ctx)
+        const { id, ...body } = args
+        const res = await ctx.client.put(`/photos/${encodeURIComponent(id)}`, body, {
+          authToken,
+          signal: extra.signal,
+        })
+        const photo = parseResponse(PhotoSchema, res.data, 'update photo')
+        return toJsonResult({
+          photo: toCompactPhoto(photo, ctx.config.appName),
+          rate_limit: res.rateLimit,
+        })
       } catch (error) {
         return toToolError(error, ctx.redact)
       }
