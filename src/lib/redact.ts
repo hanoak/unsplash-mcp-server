@@ -17,7 +17,7 @@ export function redactSecret(input: string, secret: string | undefined): string 
   return input.split(secret).join(REDACTED)
 }
 
-/** Bind a secret up front, returning a reusable redactor function. */
-export function createRedactor(secret: string | undefined): (input: string) => string {
-  return (input) => redactSecret(input, secret)
+/** Bind one or more secrets up front, returning a redactor that strips all of them. */
+export function createRedactor(...secrets: (string | undefined)[]): (input: string) => string {
+  return (input) => secrets.reduce<string>((text, secret) => redactSecret(text, secret), input)
 }
