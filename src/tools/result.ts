@@ -2,9 +2,26 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 
 import { SchemaValidationError } from '../schemas/parse.js'
 import { UnsplashApiError } from '../unsplash/errors.js'
+import type { ToolContext } from './index.js'
 
 type Redactor = (input: string) => string
 const noRedact: Redactor = (input) => input
+
+/**
+ * Guard for the tier-2 (write/`me`) tools: returns the stored OAuth user
+ * token, or throws a clear, actionable error if the user hasn't logged in.
+ * Single source of truth so every write tool reports the same guidance.
+ */
+export function requireUserToken(ctx: ToolContext): string {
+  if (!ctx.userToken) {
+    throw new UnsplashApiError(
+      'auth',
+      'This tool needs Unsplash OAuth sign-in. Run `npx @hanoak/unsplash-mcp-server login` ' +
+        'in a terminal (not through this MCP client), then restart this MCP server.',
+    )
+  }
+  return ctx.userToken
+}
 
 /** Wrap plain text as a successful tool result. */
 export function toTextResult(text: string): CallToolResult {

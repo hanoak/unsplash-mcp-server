@@ -1,6 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 
+import { loadCredentials } from './auth/store.js'
 import { loadConfig } from './config.js'
 import { logger } from './lib/logger.js'
 import { createRedactor } from './lib/redact.js'
@@ -74,8 +75,16 @@ export async function runServer(): Promise<void> {
   }
 
   const client = new UnsplashClient(config)
-  const redact = createRedactor(config.accessKey)
-  const server = createServer({ client, config, redact })
+  // Present once `login` has been run; absence just means the tier-2
+  // (write/`me`) tools aren't available yet, not a startup error.
+  const credentials = await loadCredentials()
+  const redact = createRedactor(config.accessKey, credentials?.accessToken)
+  const server = createServer({
+    client,
+    config,
+    redact,
+    ...(credentials ? { userToken: credentials.accessToken } : {}),
+  })
 
   const transport = new StdioServerTransport()
   await server.connect(transport)
