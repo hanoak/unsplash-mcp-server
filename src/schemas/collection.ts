@@ -26,3 +26,10 @@ export const SearchCollectionsResponseSchema = z.object({
   results: z.array(CollectionSchema).default([]),
 })
 export type SearchCollectionsResponse = z.infer<typeof SearchCollectionsResponseSchema>
+
+/** Response of `POST /collections/{id}/add` and `DELETE /collections/{id}/remove`. */
+export const CollectionPhotoLinkSchema = z.object({
+  collection: CollectionSchema.optional(),
+  photo: PhotoSchema.optional(),
+})
+export type CollectionPhotoLink = z.infer<typeof CollectionPhotoLinkSchema>
