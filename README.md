@@ -7,7 +7,7 @@
 [![node: >=20](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](#requirements)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](./CONTRIBUTING.md)
 
-A production-ready [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server for the [Unsplash API](https://unsplash.com/developers). It gives AI assistants — Claude Desktop, Claude Code, Cursor, VS Code, Windsurf, and any MCP client — tools to search and fetch Unsplash photos, collections, topics, users, and stats, with **Unsplash-guideline compliance built in** (ready-to-use attribution and download tracking).
+A production-ready [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server for the [Unsplash API](https://unsplash.com/developers). It gives AI assistants — Claude Desktop, Claude Code, Cursor, VS Code, Windsurf, and any MCP client — tools to search and fetch Unsplash photos, collections, topics, users, and stats, with **Unsplash-guideline compliance built in** (ready-to-use attribution and download tracking). Sign in once via OAuth to also manage your own profile, collections, and photo metadata.
 
 > [!IMPORTANT]
 > **Unofficial project.** This is not affiliated with, endorsed by, or sponsored by Unsplash. "Unsplash" is a trademark of its respective owner. You use it under your own Unsplash API account and are responsible for complying with the [Unsplash API Terms & Guidelines](https://help.unsplash.com/en/articles/2511245-unsplash-api-guidelines).
@@ -18,6 +18,7 @@ A production-ready [Model Context Protocol](https://modelcontextprotocol.io) (MC
 - [Quick start](#quick-start)
 - [Example interaction](#example-interaction)
 - [Configuration](#configuration)
+- [OAuth sign-in (optional)](#oauth-sign-in-optional)
 - [Tools](#tools)
   - [Tool reference](#tool-reference)
   - [Output shape](#output-shape)
@@ -38,7 +39,7 @@ A production-ready [Model Context Protocol](https://modelcontextprotocol.io) (MC
 
 ## Features
 
-- **21 tools** across photos, search, users, collections, topics, and stats.
+- **29 tools** across photos, search, users, collections, topics, stats, and your own profile — 21 read-only out of the box, plus 8 write/`me` tools once you [sign in](#oauth-sign-in-optional).
 - **Compliance built in** — every photo comes with ready-to-use attribution (plain text + UTM-tagged HTML), and a dedicated `unsplash_track_download` tool for the download-tracking guideline.
 - **Content safety** — `content_filter=high` by default on search and random photos.
 - **Flexible image URLs** — each photo returns `raw`/`full`/`regular`/`small`/`thumb` sizes, plus a `raw` imgix base for custom sizes (`?w=&h=&q=&fm=&fit=`).
@@ -183,41 +184,63 @@ Every tool result includes a `rate_limit` object (`limit`, `remaining`) read fro
 
 Configuration is entirely via environment variables — no config files, no flags for secrets.
 
-| Environment variable  | Required        | Description                                                                                                                             |
-| --------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `UNSPLASH_ACCESS_KEY` | **yes**         | Your Unsplash API access key. The server exits at startup with a clear message if it is missing or blank.                               |
-| `UNSPLASH_APP_NAME`   | **recommended** | Your registered Unsplash app name, used as the attribution `utm_source`. Defaults to a generic value (with a startup warning) if unset. |
-| `LOG_LEVEL`           | no              | `debug` \| `info` \| `warn` \| `error` (default `info`). All logs go to **stderr**; stdout carries only the MCP protocol.               |
+| Environment variable          | Required         | Description                                                                                                                             |
+| ----------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `UNSPLASH_ACCESS_KEY`         | **yes**          | Your Unsplash API access key. The server exits at startup with a clear message if it is missing or blank.                               |
+| `UNSPLASH_APP_NAME`           | **recommended**  | Your registered Unsplash app name, used as the attribution `utm_source`. Defaults to a generic value (with a startup warning) if unset. |
+| `UNSPLASH_SECRET_KEY`         | only for `login` | Your Unsplash app's secret key. Only needed to run `login` — see [OAuth sign-in](#oauth-sign-in-optional).                              |
+| `UNSPLASH_OAUTH_REDIRECT_URI` | only for `login` | Override the default `http://localhost:8734/callback` used by `login`. Must match the redirect URI registered on your Unsplash app.     |
+| `LOG_LEVEL`                   | no               | `debug` \| `info` \| `warn` \| `error` (default `info`). All logs go to **stderr**; stdout carries only the MCP protocol.               |
 
-CLI flags: `--version` and `--help` are supported (e.g. `npx @hanoak/unsplash-mcp-server --version`).
+CLI flags: `--version` and `--help` are supported (e.g. `npx @hanoak/unsplash-mcp-server --version`). `login`/`logout` are subcommands, not flags — see below.
+
+## OAuth sign-in (optional)
+
+The 21 core tools work out of the box with just `UNSPLASH_ACCESS_KEY`. To also use the **8 write/`me` tools** (update your profile, manage collections, edit photo metadata), sign in once via OAuth:
+
+1. On your app's page at [unsplash.com/oauth/applications](https://unsplash.com/oauth/applications), add `http://localhost:8734/callback` as a redirect URI, and copy the **Secret key**.
+2. Set both `UNSPLASH_ACCESS_KEY` and `UNSPLASH_SECRET_KEY` in your shell (not just the MCP client config — `login` runs from your terminal).
+3. Run:
+
+   ```bash
+   npx @hanoak/unsplash-mcp-server login
+   ```
+
+   This opens your browser to Unsplash's consent screen, captures the redirect on a short-lived local server, exchanges the code for a user access token, and saves it to `~/.config/unsplash-mcp-server/credentials.json` (owner-only file permissions). Unsplash user access tokens **don't expire**, so this is a one-time step — no periodic re-auth.
+
+4. Restart your MCP client. The 8 write/`me` tools are now available; the 21 read-only tools are unaffected either way.
+
+Run `npx @hanoak/unsplash-mcp-server logout` at any time to remove the stored token. To revoke it server-side, regenerate your app's secret key from the Unsplash dashboard.
 
 ## Tools
 
-All tools are namespaced `unsplash_*` and are **read-only** (annotated `readOnlyHint: true`) except `unsplash_track_download`, which registers a download event and so is marked non-read-only. Parameters map to the Unsplash API; `per_page` and stats `quantity` are clamped to a max of **30**, and `page` is 1-based.
+All tools are namespaced `unsplash_*`. Most are **read-only** (annotated `readOnlyHint: true`); the exceptions are `unsplash_track_download` (registers a download event) and the 8 write/`me` tools below, all marked non-read-only and gated behind [OAuth sign-in](#oauth-sign-in-optional). Parameters map to the Unsplash API; `per_page` and stats `quantity` are clamped to a max of **30**, and `page` is 1-based.
 
-| Domain          | Tools                                                                            |
-| --------------- | -------------------------------------------------------------------------------- |
-| **Photos**      | `random_photo`, `list_photos`, `get_photo`, `photo_statistics`, `track_download` |
-| **Search**      | `search_photos`, `search_collections`, `search_users`                            |
-| **Users**       | `get_user`, `user_photos`, `user_collections`, `user_statistics`                 |
-| **Collections** | `list_collections`, `get_collection`, `collection_photos`, `related_collections` |
-| **Topics**      | `list_topics`, `get_topic`, `topic_photos`                                       |
-| **Stats**       | `total_stats`, `month_stats`                                                     |
+| Domain          | Tools                                                                                                                                                                                                                     |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Photos**      | `random_photo`, `list_photos`, `get_photo`, `photo_statistics`, `track_download`, `update_photo` 🔒                                                                                                                       |
+| **Search**      | `search_photos`, `search_collections`, `search_users`                                                                                                                                                                     |
+| **Users**       | `get_user`, `user_photos`, `user_collections`, `user_statistics`                                                                                                                                                          |
+| **Collections** | `list_collections`, `get_collection`, `collection_photos`, `related_collections`, `create_collection` 🔒, `update_collection` 🔒, `delete_collection` 🔒, `add_photo_to_collection` 🔒, `remove_photo_from_collection` 🔒 |
+| **Topics**      | `list_topics`, `get_topic`, `topic_photos`                                                                                                                                                                                |
+| **Stats**       | `total_stats`, `month_stats`                                                                                                                                                                                              |
+| **Me**          | `get_my_profile` 🔒, `update_my_profile` 🔒                                                                                                                                                                               |
 
-> Writing to Unsplash (creating/updating collections, likes, editing your profile) requires the OAuth authorization-code flow and is planned for a future release — see [Roadmap](#roadmap).
+🔒 = requires [OAuth sign-in](#oauth-sign-in-optional) (`login`) first.
 
 ### Tool reference
 
 <details>
 <summary><b>Photos</b></summary>
 
-| Tool                        | Parameters                                                                                                                                                | Description                                                             |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `unsplash_random_photo`     | `query?`, `orientation?` (`landscape`\|`portrait`\|`squarish`), `content_filter?` (`low`\|`high`, default `high`), `collections?`, `topics?`, `username?` | A single random photo, optionally filtered.                             |
-| `unsplash_list_photos`      | `page?` (default 1), `per_page?` (default 10, max 30)                                                                                                     | The latest featured photos, paginated.                                  |
-| `unsplash_get_photo`        | `id` **(required)**                                                                                                                                       | A single photo by ID or slug, full detail.                              |
-| `unsplash_photo_statistics` | `id` **(required)**, `quantity?` (days, default 30, max 30)                                                                                               | Download/view totals for a photo over N days.                           |
-| `unsplash_track_download`   | `download_location` **(required)** — the `download_location` URL from a prior photo result (must be an `https://api.unsplash.com` URL)                    | Registers a download on real use; returns a fresh, usable download URL. |
+| Tool                        | Parameters                                                                                                                                                                                                                                  | Description                                                               |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `unsplash_random_photo`     | `query?`, `orientation?` (`landscape`\|`portrait`\|`squarish`), `content_filter?` (`low`\|`high`, default `high`), `collections?`, `topics?`, `username?`                                                                                   | A single random photo, optionally filtered.                               |
+| `unsplash_list_photos`      | `page?` (default 1), `per_page?` (default 10, max 30)                                                                                                                                                                                       | The latest featured photos, paginated.                                    |
+| `unsplash_get_photo`        | `id` **(required)**                                                                                                                                                                                                                         | A single photo by ID or slug, full detail.                                |
+| `unsplash_photo_statistics` | `id` **(required)**, `quantity?` (days, default 30, max 30)                                                                                                                                                                                 | Download/view totals for a photo over N days.                             |
+| `unsplash_track_download`   | `download_location` **(required)** — the `download_location` URL from a prior photo result (must be an `https://api.unsplash.com` URL)                                                                                                      | Registers a download on real use; returns a fresh, usable download URL.   |
+| `unsplash_update_photo` 🔒  | `id` **(required)**, `show_on_profile?`, `description?`, `tags?` (string array), `location?` (`city`/`country`/`name`/`latitude`/`longitude`), `exif?` (`make`/`model`/`exposure_time`/`aperture_value`/`focal_length`/`iso_speed_ratings`) | Update metadata on a photo you own. Only the fields you pass are changed. |
 
 </details>
 
@@ -247,12 +270,27 @@ All tools are namespaced `unsplash_*` and are **read-only** (annotated `readOnly
 <details>
 <summary><b>Collections</b></summary>
 
-| Tool                           | Parameters                                                | Description                            |
-| ------------------------------ | --------------------------------------------------------- | -------------------------------------- |
-| `unsplash_list_collections`    | `page?`, `per_page?`                                      | The latest featured collections.       |
-| `unsplash_get_collection`      | `id` **(required)**                                       | A single collection by ID.             |
-| `unsplash_collection_photos`   | `id` **(required)**, `page?`, `per_page?`, `orientation?` | Photos within a collection, paginated. |
-| `unsplash_related_collections` | `id` **(required)**                                       | Collections related to a given one.    |
+| Tool                                       | Parameters                                                | Description                                                   |
+| ------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------- |
+| `unsplash_list_collections`                | `page?`, `per_page?`                                      | The latest featured collections.                              |
+| `unsplash_get_collection`                  | `id` **(required)**                                       | A single collection by ID.                                    |
+| `unsplash_collection_photos`               | `id` **(required)**, `page?`, `per_page?`, `orientation?` | Photos within a collection, paginated.                        |
+| `unsplash_related_collections`             | `id` **(required)**                                       | Collections related to a given one.                           |
+| `unsplash_create_collection` 🔒            | `title` **(required)**, `description?`, `private?`        | Create a new collection you own.                              |
+| `unsplash_update_collection` 🔒            | `id` **(required)**, `title?`, `description?`, `private?` | Update a collection you own. Only the fields you pass change. |
+| `unsplash_delete_collection` 🔒            | `id` **(required)**                                       | Permanently delete a collection you own. Cannot be undone.    |
+| `unsplash_add_photo_to_collection` 🔒      | `id` **(required)**, `photo_id` **(required)**            | Add a photo to a collection you own.                          |
+| `unsplash_remove_photo_from_collection` 🔒 | `id` **(required)**, `photo_id` **(required)**            | Remove a photo from a collection you own.                     |
+
+</details>
+
+<details>
+<summary><b>Me (requires OAuth sign-in)</b></summary>
+
+| Tool                            | Parameters                                                                                             | Description                                                            |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| `unsplash_get_my_profile` 🔒    | _(none)_                                                                                               | Your own profile, including private fields (email, uploads remaining). |
+| `unsplash_update_my_profile` 🔒 | `username?`, `first_name?`, `last_name?`, `email?`, `url?`, `location?`, `bio?`, `instagram_username?` | Update your own profile. Only the fields you pass are changed.         |
 
 </details>
 
@@ -341,13 +379,13 @@ Photo descriptions, alt text, tags, EXIF, and user names/bios come from Unsplash
 No. The Unsplash API is free; you just register an app to get an access key. Higher throughput (Production tier) is a free review, not a paid plan.
 
 **Access Key vs Secret Key — which one?**
-The **Access Key**. The Secret Key is only for the OAuth flow (not used by this read-only server).
+For the 21 read-only tools, just the **Access Key**. The Secret Key is only needed for `login` (the OAuth flow behind the 8 write/`me` tools) — see [OAuth sign-in](#oauth-sign-in-optional).
 
 **Does it download or rehost images?**
 No. It returns Unsplash-hosted image URLs (hotlink them directly) and never rehosts or returns base64 blobs. `unsplash_track_download` only registers a download event and returns a fresh URL.
 
 **Can it create collections, like photos, or edit my profile?**
-Not yet — those are OAuth write endpoints planned for a future release (see [Roadmap](#roadmap)).
+Yes, once you [sign in](#oauth-sign-in-optional) — `unsplash_create_collection` and friends, and `unsplash_update_photo`/`unsplash_update_my_profile`. (Liking photos is not currently exposed as a tool.)
 
 **Does it work outside Claude?**
 Yes — it's a standard stdio MCP server. See [the client setup section](#2-add-the-server-to-your-mcp-client) for Claude Code, Cursor, VS Code, Windsurf, and generic stdio.
@@ -370,8 +408,8 @@ Yes — it's a standard stdio MCP server. See [the client setup section](#2-add-
 
 Full detail lives in [docs/ROADMAP.md](./docs/ROADMAP.md). In short:
 
-- **v1** _(current)_ — the 21 read-only tools, attribution + download-tracking compliance, the attribution resource, and the `find_photo` prompt.
-- **v2** — the OAuth write / `me` endpoints (create/update collections, likes, profile) via the Unsplash authorization-code flow.
+- **v1** _(shipped)_ — the 21 read-only tools, attribution + download-tracking compliance, the attribution resource, and the `find_photo` prompt.
+- **v2** _(current)_ — the 8 OAuth write / `me` endpoints (profile, collections, photo metadata) via a `login`/`logout` CLI and the Unsplash authorization-code flow.
 - **v3** — a `.mcpb` Desktop Extension for one-click Claude Desktop install, plus more MCP prompts.
 
 Changes are tracked in [CHANGELOG.md](./CHANGELOG.md); the project follows [Semantic Versioning](https://semver.org).
