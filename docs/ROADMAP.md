@@ -4,17 +4,19 @@ What has shipped and what's planned next. The **roadmap** below covers upcoming 
 
 ## Roadmap
 
-### ✅ v1 — current release
+### ✅ v1 — shipped
 
 The public, read-only surface plus production hardening: **21 tools** across photos, search, users, collections, topics, and stats; an `unsplash://guides/attribution` resource and a `find_photo` prompt; built-in Unsplash-guideline compliance (ready-to-use attribution + download tracking); a robust retrying HTTP client; and CI quality gates (coverage, dependency-license, package validation). Full detail in the checklist below.
 
-### v2 — OAuth write / `me` endpoints
+### ✅ v2 — current release — OAuth write / `me` endpoints
 
 The 8 tier-2 endpoints that require the Unsplash **OAuth authorization-code flow** (user access tokens + scopes) — not possible with the Client-ID access key alone:
 
-- `GET /me`, `PUT /me`
-- `POST /collections`, `PUT /collections/{id}`, `DELETE /collections/{id}`, `POST /collections/{id}/add`, `DELETE /collections/{id}/remove`
-- `PUT /photos/{id}`
+- `unsplash_get_my_profile` / `unsplash_update_my_profile` (`GET`/`PUT /me`)
+- `unsplash_create_collection` / `unsplash_update_collection` / `unsplash_delete_collection` / `unsplash_add_photo_to_collection` / `unsplash_remove_photo_from_collection`
+- `unsplash_update_photo` (`PUT /photos/{id}`)
+
+Delivered via a new `login`/`logout` CLI command (`npx @hanoak/unsplash-mcp-server login`): a local loopback OAuth flow that opens the consent screen, captures the redirect, exchanges the code, and persists the resulting user access token to `~/.config/unsplash-mcp-server/credentials.json` (owner-only permissions). Unsplash user access tokens don't expire, so there's no refresh-token flow to maintain. The 8 new tools are gated behind a shared `requireUserToken` guard and report a clear "run login" error until the user signs in; every other tool is unaffected. See the README's "OAuth sign-in" section for setup.
 
 ### v3 — `.mcpb` Desktop Extension + more prompts
 
@@ -116,7 +118,7 @@ Everything below was built and verified for the first release; the few remaining
 
 ## 7. API surface / DX of the server
 
-- [x] `[v1]` Decide tool set (search photos, get photo, random, collections, user, topics, stats…) ✅ 21 read endpoints for v1; 8 OAuth deferred
+- [x] `[v1]` Decide tool set (search photos, get photo, random, collections, user, topics, stats…) ✅ 21 read endpoints for v1; 8 OAuth write/`me` endpoints shipped in v2
 - [x] `[v1]` Consistent, well-described tool schemas (descriptions matter — LLM reads them) ✅ all 21 tools have described input schemas
 - [x] `[v1]` Token-efficient output shape (trim huge Unsplash responses) ✅ toCompactPhoto + compact stats
 - [x] `[v1]` Pagination support ✅ list_photos page/per_page
