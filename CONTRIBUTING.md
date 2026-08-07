@@ -39,9 +39,10 @@ Connect, open the **Tools** tab, and run any tool. Server logs (stderr) appear i
 
 ## Project structure & conventions
 
-- **One file per resource domain** under `src/tools/` (`photos.ts`, `search.ts`, `users.ts`, `collections.ts`, `topics.ts`, `stats.ts`). Each file exposes a `register<Domain>Tools(server, ctx)` registrar that `src/tools/index.ts` calls. Adding a tool means editing its domain file — never `server.ts`.
+- **One file per resource domain** under `src/tools/` (`photos.ts`, `search.ts`, `users.ts`, `collections.ts`, `topics.ts`, `stats.ts`, `me.ts`). Each file exposes a `register<Domain>Tools(server, ctx)` registrar that `src/tools/index.ts` calls. Adding a tool means editing its domain file — never `server.ts`.
 - **Tool input schemas** live in the tool file (zod, kept flat/JSON-Schema-safe). `src/schemas/` is for **Unsplash response/wire schemas only**, and they are intentionally **lenient** (only `id` required; everything else optional/nullable) so upstream field changes degrade gracefully.
 - **Errors** are mapped to MCP `isError` results via `src/tools/result.ts` — never thrown as protocol errors. Do not copy-paste error mapping.
+- **Tier-2 (write/`me`) tools** call `requireUserToken(ctx)` from `src/tools/result.ts` first — it returns the stored OAuth token or throws the one shared "run login" error. The OAuth flow itself (authorize URL, token exchange, credential store, loopback callback server, `login`/`logout` CLI) lives in `src/auth/`.
 - **No secrets in logs.** stdout is the JSON-RPC channel; log only to stderr (`src/lib/logger.ts`). All error text runs through the redactor.
 - **`no-explicit-any`** and **`no-console`** (except `console.error`) are enforced by ESLint.
 
