@@ -44,9 +44,32 @@ function fakeFetch(responder: () => Response) {
   return { fn, calls }
 }
 
-async function connect(fetchImpl: typeof fetch): Promise<Client> {
+interface RecordedCall {
+  readonly url: string
+  readonly init: RequestInit
+}
+
+/** Like {@link fakeFetch}, but also records method/headers/body — for the update_photo tests. */
+function fakeFetchDetailed(responder: () => Response) {
+  const calls: RecordedCall[] = []
+  const fn = (async (input: string | URL | Request, init?: RequestInit) => {
+    calls.push({ url: String(input), init: init ?? {} })
+    return responder()
+  }) as unknown as typeof fetch
+  return { fn, calls }
+}
+
+async function connect(
+  fetchImpl: typeof fetch,
+  options: { userToken?: string } = {},
+): Promise<Client> {
   const client = new UnsplashClient(config, { fetch: fetchImpl, sleep: async () => {} })
-  const server = createServer({ client, config, redact: (s) => s })
+  const server = createServer({
+    client,
+    config,
+    redact: (s) => s,
+    ...(options.userToken ? { userToken: options.userToken } : {}),
+  })
   const mcpClient = new Client({ name: 'test', version: '0.0.0' })
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
   await server.connect(serverTransport)
@@ -211,5 +234,38 @@ describe('photos domain tools (in-memory MCP integration)', () => {
     expect(res.isError).toBe(true)
     expect(firstText(res)).toContain('non-Unsplash')
     expect(calls.length).toBe(0)
+  })
+
+  it('unsplash_update_photo errors when not logged in', async () => {
+    const { fn } = fakeFetchDetailed(() => jsonResponse(photoFixture))
+    const client = await connect(fn)
+    const res = (await client.callTool({
+      name: 'unsplash_update_photo',
+      arguments: { id: 'rand123', description: 'new desc' },
+    })) as CallToolResult
+    expect(res.isError).toBe(true)
+    expect(firstText(res)).toContain('login')
+  })
+
+  it('unsplash_update_photo PUTs the body without the id and returns the updated photo', async () => {
+    const { fn, calls } = fakeFetchDetailed(() =>
+      jsonResponse({ ...photoFixture, alt_description: 'new desc' }),
+    )
+    const client = await connect(fn, { userToken: 'user-token-1' })
+    const res = (await client.callTool({
+      name: 'unsplash_update_photo',
+      arguments: { id: 'rand123', description: 'new desc', tags: ['sunset'] },
+    })) as CallToolResult
+    expect(res.isError).toBeFalsy()
+    expect((JSON.parse(firstText(res)) as { photo: { id: string } }).photo.id).toBe('rand123')
+
+    const { url, init } = calls[0]!
+    expect(url).toContain('/photos/rand123')
+    expect(init.method).toBe('PUT')
+    expect(new Headers(init.headers).get('authorization')).toBe('Bearer user-token-1')
+    expect(JSON.parse(init.body as string)).toEqual({
+      description: 'new desc',
+      tags: ['sunset'],
+    })
   })
 })
