@@ -1,3 +1,5 @@
+import { login, logout } from './auth/login.js'
+import { OAuthError } from './auth/oauth.js'
 import { ConfigError } from './config.js'
 import { nodeVersionError } from './lib/node-guard.js'
 import { runServer } from './server.js'
@@ -17,22 +19,27 @@ Unsplash access key via the UNSPLASH_ACCESS_KEY environment variable.
 
 Usage:
   unsplash-mcp-server            Run the MCP server over stdio
+  unsplash-mcp-server login      Authorize via Unsplash OAuth (enables the write/me tools)
+  unsplash-mcp-server logout     Remove the stored OAuth credentials
   unsplash-mcp-server --version  Print the version and exit
   unsplash-mcp-server --help     Print this help and exit
 
 Environment:
-  UNSPLASH_ACCESS_KEY  (required)    your Unsplash API access key
-  UNSPLASH_APP_NAME    (recommended) your registered app name (attribution)
-  LOG_LEVEL            debug | info | warn | error (default: info)
+  UNSPLASH_ACCESS_KEY          (required)         your Unsplash API access key
+  UNSPLASH_APP_NAME            (recommended)       your registered app name (attribution)
+  UNSPLASH_SECRET_KEY          (for "login" only)  your Unsplash app's secret key
+  UNSPLASH_OAUTH_REDIRECT_URI  (for "login" only)  override the default
+                                                    http://localhost:8734/callback redirect URI
+  LOG_LEVEL                    debug | info | warn | error (default: info)
 
 Docs: https://github.com/hanoak/unsplash-mcp-server`
 
 // Last-resort crash guards. A stray throw must go to stderr, never stdout
 // (which carries the JSON-RPC stream), and must exit non-zero.
 function fatal(prefix: string, error: unknown): never {
-  // Configuration problems are user-facing: print the guidance verbatim,
+  // Configuration/OAuth problems are user-facing: print the guidance verbatim,
   // without the "fatal" framing or a stack trace.
-  if (error instanceof ConfigError) {
+  if (error instanceof ConfigError || error instanceof OAuthError) {
     process.stderr.write(`${error.message}\n`)
     process.exit(1)
   }
@@ -60,6 +67,27 @@ function main(): void {
     process.stdout.write(`${HELP}\n`)
     return
   }
+
+  // login/logout are interactive CLI commands, not the stdio server — handle
+  // them before the TTY guard below (which exists specifically to stop the
+  // server from hanging when launched from an interactive terminal).
+  const command = process.argv[2]
+  if (command === 'login') {
+    login()
+      .then(() => process.exit(0))
+      .catch((error: unknown) => fatal('login', error))
+    return
+  }
+  if (command === 'logout') {
+    logout()
+      .then((message) => {
+        process.stdout.write(`${message}\n`)
+        process.exit(0)
+      })
+      .catch((error: unknown) => fatal('logout', error))
+    return
+  }
+
   // Launched interactively in a terminal? The stdio JSON-RPC loop would just
   // hang waiting for input, so print usage and exit instead of appearing frozen.
   if (process.stdin.isTTY) {
