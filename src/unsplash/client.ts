@@ -24,11 +24,22 @@ export interface UnsplashClientOptions {
 export type QueryValue = string | number | boolean | undefined
 export type QueryParams = Record<string, QueryValue>
 
-export interface GetOptions {
+export interface RequestOptions {
   readonly params?: QueryParams
   /** Abort signal from the caller (e.g. MCP cancellation); aborts are not retried. */
   readonly signal?: AbortSignal
+  /** Send `Authorization: Bearer <authToken>` instead of the app's `Client-ID`. */
+  readonly authToken?: string
 }
+
+export type GetOptions = RequestOptions
+
+export interface MutateOptions extends RequestOptions {
+  /** JSON-serialized as the request body when present. */
+  readonly body?: unknown
+}
+
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
 export interface UnsplashResponse<T = unknown> {
   /** Parsed JSON body. Callers validate the shape with a zod schema. */
@@ -68,18 +79,49 @@ export class UnsplashClient {
 
   /** Perform an authenticated GET, retrying transient failures. */
   async get<T = unknown>(path: string, options: GetOptions = {}): Promise<UnsplashResponse<T>> {
+    return this.#request<T>('GET', path, options)
+  }
+
+  /** Perform an authenticated POST (JSON body), retrying transient failures. */
+  async post<T = unknown>(
+    path: string,
+    body?: unknown,
+    options: RequestOptions = {},
+  ): Promise<UnsplashResponse<T>> {
+    return this.#request<T>('POST', path, { ...options, body })
+  }
+
+  /** Perform an authenticated PUT (JSON body), retrying transient failures. */
+  async put<T = unknown>(
+    path: string,
+    body?: unknown,
+    options: RequestOptions = {},
+  ): Promise<UnsplashResponse<T>> {
+    return this.#request<T>('PUT', path, { ...options, body })
+  }
+
+  /** Perform an authenticated DELETE, retrying transient failures. */
+  async delete<T = unknown>(path: string, options: GetOptions = {}): Promise<UnsplashResponse<T>> {
+    return this.#request<T>('DELETE', path, options)
+  }
+
+  async #request<T = unknown>(
+    method: HttpMethod,
+    path: string,
+    options: MutateOptions,
+  ): Promise<UnsplashResponse<T>> {
     const url = this.#buildUrl(path, options.params)
     let attempt = 0
 
     for (;;) {
       try {
-        const response = await this.#fetchWithTimeout(url, options.signal)
+        const response = await this.#fetchWithTimeout(method, url, options)
         const rateLimit = readRateLimit(response.headers)
 
         if (response.ok) {
-          const data = (await response.json()) as T
+          const data = await this.#readBody<T>(response)
           logger.debug(
-            `GET ${path} -> ${response.status} (remaining: ${rateLimit.remaining ?? '?'})`,
+            `${method} ${path} -> ${response.status} (remaining: ${rateLimit.remaining ?? '?'})`,
           )
           return { data, rateLimit }
         }
@@ -88,7 +130,7 @@ export class UnsplashClient {
           const delay = retryDelay(response, attempt)
           attempt += 1
           logger.warn(
-            `GET ${path} -> ${response.status}; retry ${attempt}/${this.#maxRetries} in ${delay}ms`,
+            `${method} ${path} -> ${response.status}; retry ${attempt}/${this.#maxRetries} in ${delay}ms`,
           )
           await this.#sleep(delay)
           continue
@@ -110,7 +152,7 @@ export class UnsplashClient {
           const delay = backoff(attempt)
           attempt += 1
           logger.warn(
-            `GET ${path} failed (${kind}); retry ${attempt}/${this.#maxRetries} in ${delay}ms`,
+            `${method} ${path} failed (${kind}); retry ${attempt}/${this.#maxRetries} in ${delay}ms`,
           )
           await this.#sleep(delay)
           continue
@@ -135,20 +177,31 @@ export class UnsplashClient {
     return url.toString()
   }
 
-  #fetchWithTimeout(url: string, external?: AbortSignal): Promise<Response> {
+  #fetchWithTimeout(method: HttpMethod, url: string, options: MutateOptions): Promise<Response> {
     const timeout = AbortSignal.timeout(this.#timeoutMs)
-    const signal = external ? AbortSignal.any([timeout, external]) : timeout
-    return this.#fetch(url, {
-      method: 'GET',
-      headers: {
-        // Header form keeps the key out of loggable URLs.
-        Authorization: `Client-ID ${this.#accessKey}`,
-        'Accept-Version': 'v1',
-        Accept: 'application/json',
-        'User-Agent': USER_AGENT,
-      },
-      signal,
-    })
+    const signal = options.signal ? AbortSignal.any([timeout, options.signal]) : timeout
+    const headers: Record<string, string> = {
+      // Header form keeps the key/token out of loggable URLs.
+      Authorization: options.authToken
+        ? `Bearer ${options.authToken}`
+        : `Client-ID ${this.#accessKey}`,
+      'Accept-Version': 'v1',
+      Accept: 'application/json',
+      'User-Agent': USER_AGENT,
+    }
+    const init: RequestInit = { method, headers, signal }
+    if (options.body !== undefined) {
+      headers['Content-Type'] = 'application/json'
+      init.body = JSON.stringify(options.body)
+    }
+    return this.#fetch(url, init)
+  }
+
+  /** Parse a JSON body, tolerating the empty body that 204 (and some 200) responses send. */
+  async #readBody<T>(response: Response): Promise<T> {
+    if (response.status === 204) return undefined as T
+    const text = await response.text()
+    return (text ? JSON.parse(text) : undefined) as T
   }
 
   async #mapErrorResponse(response: Response, rateLimit: RateLimitInfo): Promise<UnsplashApiError> {
