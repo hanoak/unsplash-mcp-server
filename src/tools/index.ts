@@ -16,8 +16,10 @@ import { registerUserTools } from './users.js'
 export interface ToolContext {
   readonly client: UnsplashClient
   readonly config: Config
-  /** Secret redactor bound to the access key; applied to MCP error output. */
+  /** Secret redactor bound to the access key (and the user token, once logged in); applied to MCP error output. */
   readonly redact: (input: string) => string
+  /** OAuth user access token, present once `login` has been run. Tier-2 (write/`me`) tools require it — see `requireUserToken`. */
+  readonly userToken?: string
 }
 
 /**
