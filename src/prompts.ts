@@ -187,4 +187,47 @@ export function registerPrompts(server: McpServer): void {
       return { messages: [{ role: 'user', content: { type: 'text', text } }] }
     },
   )
+
+  const LOGIN_REMINDER =
+    'If any tool reports you are not logged in, tell the user to run ' +
+    '`npx @hanoak/unsplash-mcp-server login` in a terminal, then try again — this workflow needs ' +
+    'OAuth sign-in.'
+
+  server.registerPrompt(
+    'curate_collection',
+    {
+      title: 'Curate an Unsplash collection',
+      description:
+        'Search Unsplash for a theme, then build (or extend) a real collection from the best ' +
+        'matches. Requires OAuth sign-in.',
+      argsSchema: {
+        theme: z
+          .string()
+          .min(1)
+          .describe('What the collection should be about, e.g. "cozy autumn mornings".'),
+        count: z.string().optional().describe('How many photos to add (default 6, max 10).'),
+        collection_id: z
+          .string()
+          .optional()
+          .describe('An existing collection ID to add to, instead of creating a new one.'),
+      },
+    },
+    (args) => {
+      const count = clampCount(args.count, 6, 10)
+      const collectionStep = args.collection_id
+        ? `Add photos to the existing collection with id "${args.collection_id}" — do not create a new one.`
+        : `Call \`unsplash_create_collection\` with a fitting title and description for "${args.theme}" to create a new collection.`
+
+      const text = [
+        `Curate an Unsplash collection about ${args.theme}.`,
+        `1. Use \`unsplash_search_photos\` to find up to ${count} well-matched photos.`,
+        `2. ${collectionStep}`,
+        "3. For each photo you keep, call `unsplash_add_photo_to_collection` with the collection's id and the photo's id.",
+        '4. Present each added photo with its attribution (`attribution.text` or `attribution.html`), then share the collection page link at the end.',
+        LOGIN_REMINDER,
+      ].join('\n')
+
+      return { messages: [{ role: 'user', content: { type: 'text', text } }] }
+    },
+  )
 }

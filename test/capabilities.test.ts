@@ -151,4 +151,35 @@ describe('prompts', () => {
     expect(text).toContain('unsplash_total_stats')
     expect(text).toContain('unsplash_month_stats')
   })
+
+  it('templates curate_collection creating a new collection when no collection_id is given', async () => {
+    const client = await connect(noFetch)
+    const { prompts } = await client.listPrompts()
+    expect(prompts.some((p) => p.name === 'curate_collection')).toBe(true)
+
+    const got = await client.getPrompt({
+      name: 'curate_collection',
+      arguments: { theme: 'cozy autumn mornings', count: '4' },
+    })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('cozy autumn mornings')
+    expect(text).toContain('unsplash_search_photos')
+    expect(text).toContain('unsplash_create_collection')
+    expect(text).toContain('unsplash_add_photo_to_collection')
+    expect(text).toContain('up to 4')
+    expect(text).toContain('login')
+  })
+
+  it('templates curate_collection adding to an existing collection when collection_id is given', async () => {
+    const client = await connect(noFetch)
+    const got = await client.getPrompt({
+      name: 'curate_collection',
+      arguments: { theme: 'cozy autumn mornings', collection_id: 'coll_123' },
+    })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('coll_123')
+    expect(text).not.toContain('unsplash_create_collection')
+    expect(text).toContain('unsplash_add_photo_to_collection')
+    expect(text).toContain('up to 6') // default count
+  })
 })
