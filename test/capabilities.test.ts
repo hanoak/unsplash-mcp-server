@@ -28,6 +28,18 @@ describe('resources', () => {
     expect(text).toContain('npx @hanoak/unsplash-mcp-server login')
     expect(text).toContain('do not expire')
   })
+
+  it('exposes and reads the prompts-guide resource', async () => {
+    const client = await connect(noFetch)
+    const { resources } = await client.listResources()
+    expect(resources.some((r) => r.uri === 'unsplash://guides/prompts')).toBe(true)
+
+    const res = await client.readResource({ uri: 'unsplash://guides/prompts' })
+    const text = (res.contents[0] as { text: string }).text
+    expect(text).toContain('find_photo')
+    expect(text).toContain('curate_collection')
+    expect(text).toContain('refresh_profile')
+  })
 })
 
 describe('prompts', () => {

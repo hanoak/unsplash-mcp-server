@@ -48,6 +48,25 @@ const OAUTH_SETUP_GUIDE = [
     're-auth. Run `npx @hanoak/unsplash-mcp-server logout` to remove the stored token.',
 ].join('\n')
 
+const PROMPTS_GUIDE_URI = 'unsplash://guides/prompts'
+
+/** A "which prompt to use" reference for the 8 prompts in `src/prompts.ts`. */
+const PROMPTS_GUIDE = [
+  '# Choosing an Unsplash prompt',
+  '',
+  'This server ships 8 prompts. Three need OAuth sign-in (see the oauth-setup guide) — the ' +
+    'rest work with just an access key.',
+  '',
+  '- `find_photo` — one best-match photo for a subject.',
+  '- `photo_gallery` — a themed set of several photos; supports `orientation`/`color` filters.',
+  '- `topic_spotlight` — showcase a curated Unsplash topic (e.g. `wallpapers`).',
+  "- `photographer_spotlight` — a user's profile plus their most popular work.",
+  '- `platform_pulse` — a quick Unsplash-wide stats briefing.',
+  '- `curate_collection` (sign-in required) — search, then build or extend a real collection.',
+  '- `describe_photo` (sign-in required) — tag/describe a photo you own.',
+  '- `refresh_profile` (sign-in required) — update your bio, location, or portfolio URL.',
+].join('\n')
+
 /** Register read-only reference resources (compliance + setup guides). */
 export function registerResources(server: McpServer): void {
   server.registerResource(
@@ -81,6 +100,19 @@ export function registerResources(server: McpServer): void {
       contents: [
         { uri: OAUTH_SETUP_GUIDE_URI, mimeType: 'text/markdown', text: OAUTH_SETUP_GUIDE },
       ],
+    }),
+  )
+
+  server.registerResource(
+    'prompts-guide',
+    PROMPTS_GUIDE_URI,
+    {
+      title: 'Which Unsplash prompt to use',
+      description: 'A reference for the 8 available prompts and when to use each.',
+      mimeType: 'text/markdown',
+    },
+    () => ({
+      contents: [{ uri: PROMPTS_GUIDE_URI, mimeType: 'text/markdown', text: PROMPTS_GUIDE }],
     }),
   )
 }
