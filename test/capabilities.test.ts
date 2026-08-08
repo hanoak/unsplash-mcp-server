@@ -45,4 +45,44 @@ describe('prompts', () => {
     expect(text).toContain('mountains')
     expect(text).not.toContain('orientation')
   })
+
+  it('templates photo_gallery with theme, count, orientation, and color', async () => {
+    const client = await connect(noFetch)
+    const { prompts } = await client.listPrompts()
+    expect(prompts.some((p) => p.name === 'photo_gallery')).toBe(true)
+
+    const got = await client.getPrompt({
+      name: 'photo_gallery',
+      arguments: { theme: 'autumn forests', count: '8', orientation: 'landscape', color: 'orange' },
+    })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('autumn forests')
+    expect(text).toContain('per_page: 8')
+    expect(text).toContain('orientation: "landscape"')
+    expect(text).toContain('color: "orange"')
+    expect(text).toContain('unsplash_search_photos')
+    expect(text).toContain('unsplash_track_download')
+  })
+
+  it('photo_gallery falls back to a default count and ignores invalid orientation/color', async () => {
+    const client = await connect(noFetch)
+    const got = await client.getPrompt({
+      name: 'photo_gallery',
+      arguments: { theme: 'city skylines', count: '', orientation: 'sideways', color: 'rainbow' },
+    })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('per_page: 5')
+    expect(text).not.toContain('orientation:')
+    expect(text).not.toContain('color:')
+  })
+
+  it('photo_gallery clamps an oversized count to the max of 10', async () => {
+    const client = await connect(noFetch)
+    const got = await client.getPrompt({
+      name: 'photo_gallery',
+      arguments: { theme: 'oceans', count: '100' },
+    })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('per_page: 10')
+  })
 })
