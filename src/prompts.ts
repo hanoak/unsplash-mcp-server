@@ -168,4 +168,23 @@ export function registerPrompts(server: McpServer): void {
       return { messages: [{ role: 'user', content: { type: 'text', text } }] }
     },
   )
+
+  server.registerPrompt(
+    'platform_pulse',
+    {
+      title: 'Unsplash platform pulse',
+      description: 'A quick briefing of Unsplash-wide stats: all-time totals and this month.',
+      argsSchema: {},
+    },
+    () => {
+      const text = [
+        'Give a quick briefing of Unsplash-wide activity.',
+        'Use `unsplash_total_stats` for all-time totals and `unsplash_month_stats` for the last ' +
+          '30 days, then present both together as a short, readable summary (photos, downloads, ' +
+          'views).',
+      ].join('\n')
+
+      return { messages: [{ role: 'user', content: { type: 'text', text } }] }
+    },
+  )
 }
