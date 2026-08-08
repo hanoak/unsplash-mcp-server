@@ -8,7 +8,7 @@ What has shipped and what's planned next. The **roadmap** below covers upcoming 
 
 The public, read-only surface plus production hardening: **21 tools** across photos, search, users, collections, topics, and stats; an `unsplash://guides/attribution` resource and a `find_photo` prompt; built-in Unsplash-guideline compliance (ready-to-use attribution + download tracking); a robust retrying HTTP client; and CI quality gates (coverage, dependency-license, package validation). Full detail in the checklist below.
 
-### ✅ v2 — current release — OAuth write / `me` endpoints
+### ✅ v2 — shipped — OAuth write / `me` endpoints
 
 The 8 tier-2 endpoints that require the Unsplash **OAuth authorization-code flow** (user access tokens + scopes) — not possible with the Client-ID access key alone:
 
@@ -18,11 +18,14 @@ The 8 tier-2 endpoints that require the Unsplash **OAuth authorization-code flow
 
 Delivered via a new `login`/`logout` CLI command (`npx @hanoak/unsplash-mcp-server login`): a local loopback OAuth flow that opens the consent screen, captures the redirect, exchanges the code, and persists the resulting user access token to `~/.config/unsplash-mcp-server/credentials.json` (owner-only permissions). Unsplash user access tokens don't expire, so there's no refresh-token flow to maintain. The 8 new tools are gated behind a shared `requireUserToken` guard and report a clear "run login" error until the user signs in; every other tool is unaffected. See the README's "OAuth sign-in" section for setup.
 
-### v3 — `.mcpb` Desktop Extension + more prompts
+### ✅ v3 — current release — expanded prompt library
 
-A Desktop Extension bundle (a manifest + `mcpb pack`) for **one-click install in Claude Desktop** — no manual JSON config editing. The strongest adoption / discoverability lever.
+v1 shipped a single `find_photo` prompt. v3 adds 7 more, covering every tool domain at least once — see the README's [Resources & prompts](../README.md#resources--prompts) section for the full table:
 
-**Expand the MCP prompt library.** v1 ships a single `find_photo` prompt. Add more server prompts for common Unsplash workflows (e.g. building an attributed gallery, finding photos by color/mood, assembling a themed collection) so clients get more ready-made entry points.
+- **Read-only**: `photo_gallery` (themed multi-photo set with color/mood filters), `topic_spotlight` (curated topic showcase), `photographer_spotlight` (a user's profile + best work), `platform_pulse` (quick stats briefing).
+- **OAuth-gated**, showcasing the v2 write tools: `curate_collection` (search, then build or extend a real collection), `describe_photo` (tag/describe a photo you own), `refresh_profile` (update your bio/portfolio with before/after).
+
+**`.mcpb` Desktop Extension dropped from v3.** A one-click Claude Desktop install bundle was the original other half of v3's scope, but was moved to unscheduled future scope after a tradeoffs discussion: `npx` already works across every supported client (not just Claude Desktop), the OAuth tools would still need a terminal step regardless (MCPB has no "run a setup script on install" hook), and the concrete win — Smithery listing, which needs a hosted URL or a `.mcpb` — matters only if that listing becomes a priority. Revisit if it does; not on the roadmap otherwise.
 
 ---
 
@@ -137,7 +140,7 @@ Everything below was built and verified for the first release; the few remaining
 - [x] `[v1]` Support `--version` / `--help` and detect a TTY on the bin (so `npx unsplash-mcp-server` in a terminal prints usage instead of silently hanging on the stdio loop) ✅ src/index.ts; verified via bin smoke
 - [x] `[v1]` Populate package.json discoverability metadata (keywords: mcp/modelcontextprotocol/unsplash, description, repository, homepage, bugs) ✅ keywords/description/repository/homepage/bugs set
 - [x] `[v1]` npm name: **`@hanoak/unsplash-mcp-server`** ✅ decided (3 unscoped names taken; scoped name free). Bin command: `unsplash-mcp-server`. Scope owned by the user (existing npm account `hanoak`). Differentiator: full Unsplash-guideline compliance (download tracking + attribution) built in.
-- [ ] `[post-v1]` Ship a Desktop Extension (`.mcpb`) bundle for one-click Claude Desktop install — **planned for v3** (release roadmap: v1 = current scope, v2 = OAuth write/`me` endpoints, v3 = `.mcpb`). Highest adoption lever; a manifest + `mcpb pack` step.
+- [ ] `[post-v1]` Ship a Desktop Extension (`.mcpb`) bundle for one-click Claude Desktop install — **dropped from v3, moved to unscheduled future scope** (see the v3 section above). `npx` already works across every supported client; the concrete remaining win is Smithery listing, which needs a hosted URL or a `.mcpb` — revisit only if that becomes a priority.
 
 ## 9. Observability (lightweight)
 
@@ -169,7 +172,7 @@ Everything below was built and verified for the first release; the few remaining
 
 ## 13. Discovery & ecosystem
 
-- [x] `[v1]` List on the official MCP registry (`server.json` manifest) + community catalogs — the main way people discover MCP servers ✅ published to the official registry as `io.github.hanoak/unsplash-mcp-server`; listed on Glama (`glama.json`), awesome-mcp-servers, mcp.so, and PulseMCP. **Smithery deferred to v3**: its onboarding now needs a hosted HTTPS URL or a local `.mcpb` bundle, which the v3 `.mcpb` will provide.
+- [x] `[v1]` List on the official MCP registry (`server.json` manifest) + community catalogs — the main way people discover MCP servers ✅ published to the official registry as `io.github.hanoak/unsplash-mcp-server`; listed on Glama (`glama.json`), awesome-mcp-servers, mcp.so, and PulseMCP. **Smithery still deferred**: its onboarding needs a hosted HTTPS URL or a local `.mcpb` bundle; `.mcpb` was dropped from v3 to unscheduled future scope, so this stays deferred until that's revisited.
 
 ## 14. Governance
 
