@@ -138,4 +138,34 @@ export function registerPrompts(server: McpServer): void {
       return { messages: [{ role: 'user', content: { type: 'text', text } }] }
     },
   )
+
+  server.registerPrompt(
+    'photographer_spotlight',
+    {
+      title: 'Spotlight an Unsplash photographer',
+      description: "Look up a user's profile and showcase their best work with attribution.",
+      argsSchema: {
+        username: z
+          .string()
+          .min(1)
+          .describe('The Unsplash username (without the @), e.g. "janedoe".'),
+        count: z.string().optional().describe('How many photos to include (default 5, max 10).'),
+      },
+    },
+    (args) => {
+      const count = clampCount(args.count, 5, 10)
+      const text = [
+        `Spotlight the Unsplash photographer "${args.username}".`,
+        `Use the \`unsplash_get_user\` tool to introduce them (name, bio, stats), then ` +
+          `\`unsplash_user_photos\` (username: "${args.username}", per_page: ${count}, ` +
+          `order_by: "popular") to gather up to ${count} of their best photos.`,
+        'Present their profile intro first, then each photo:',
+        '- display the image using its `regular` URL,',
+        '- include the ready-to-use attribution (`attribution.text` or `attribution.html`) next to it,',
+        "- and call `unsplash_track_download` with each photo's `download_location` once you display it.",
+      ].join('\n')
+
+      return { messages: [{ role: 'user', content: { type: 'text', text } }] }
+    },
+  )
 }
