@@ -320,7 +320,10 @@ Tools return trimmed, token-efficient JSON rather than raw Unsplash responses:
 
 Beyond tools, the server also exposes:
 
-- **Resource** `unsplash://guides/attribution` — a compact compliance guide (attribution, download tracking, hotlinking, content safety) your client can pull in as context.
+- **Resources** — compact guides your client can pull in as context:
+  - `unsplash://guides/attribution` — attribution, download tracking, hotlinking, content safety.
+  - `unsplash://guides/oauth-setup` — how to sign in for the 8 write/`me` tools.
+  - `unsplash://guides/prompts` — which of the prompts below to use for a given task.
 - **Prompts** — ready-made tasks your client can surface directly; each expands into a guided, multi-step tool-calling task:
 
   | Prompt                   | Arguments                                              | What it does                                                       |
