@@ -182,4 +182,29 @@ describe('prompts', () => {
     expect(text).toContain('unsplash_add_photo_to_collection')
     expect(text).toContain('up to 6') // default count
   })
+
+  it('templates describe_photo with description and tags provided', async () => {
+    const client = await connect(noFetch)
+    const { prompts } = await client.listPrompts()
+    expect(prompts.some((p) => p.name === 'describe_photo')).toBe(true)
+
+    const got = await client.getPrompt({
+      name: 'describe_photo',
+      arguments: { id: 'ph1', description: 'a foggy pine forest', tags: 'forest, fog' },
+    })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('"ph1"')
+    expect(text).toContain('description: "a foggy pine forest"')
+    expect(text).toContain('tags: "forest, fog"')
+    expect(text).toContain('unsplash_get_photo')
+    expect(text).toContain('unsplash_update_photo')
+    expect(text).toContain('login')
+  })
+
+  it('describe_photo asks the user for values when none are given', async () => {
+    const client = await connect(noFetch)
+    const got = await client.getPrompt({ name: 'describe_photo', arguments: { id: 'ph1' } })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('Ask the user what new description/tags they want')
+  })
 })

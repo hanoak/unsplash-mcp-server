@@ -230,4 +230,39 @@ export function registerPrompts(server: McpServer): void {
       return { messages: [{ role: 'user', content: { type: 'text', text } }] }
     },
   )
+
+  server.registerPrompt(
+    'describe_photo',
+    {
+      title: 'Describe an Unsplash photo',
+      description: 'Add a description and/or tags to a photo you own. Requires OAuth sign-in.',
+      argsSchema: {
+        id: z.string().min(1).describe('The Unsplash photo ID or slug to update.'),
+        description: z.string().optional().describe('New description for the photo.'),
+        tags: z.string().optional().describe('New comma-separated list of tags for the photo.'),
+      },
+    },
+    (args) => {
+      const updates = [
+        args.description ? `description: "${args.description}"` : undefined,
+        args.tags ? `tags: "${args.tags}"` : undefined,
+      ]
+        .filter(Boolean)
+        .join(', ')
+      const applyStep = updates
+        ? `Call \`unsplash_update_photo\` (id: "${args.id}", ${updates}) to apply the change.`
+        : `Ask the user what new description/tags they want, then call ` +
+          `\`unsplash_update_photo\` (id: "${args.id}") with those values.`
+
+      const text = [
+        `Update the Unsplash photo "${args.id}".`,
+        `1. Use \`unsplash_get_photo\` (id: "${args.id}") to show its current description and tags.`,
+        `2. ${applyStep}`,
+        '3. Present the before and after so the user can confirm the change stuck.',
+        LOGIN_REMINDER,
+      ].join('\n')
+
+      return { messages: [{ role: 'user', content: { type: 'text', text } }] }
+    },
+  )
 }
