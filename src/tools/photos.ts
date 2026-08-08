@@ -76,9 +76,11 @@ const updatePhotoInput = {
     .describe("Whether the photo shows on the owner's profile."),
   description: z.string().trim().min(1).optional().describe('New photo description.'),
   tags: z
-    .array(z.string().trim().min(1))
+    .string()
+    .trim()
+    .min(1)
     .optional()
-    .describe('New list of tags for the photo (replaces the existing tags).'),
+    .describe('Comma-separated list of tags for the photo (replaces the existing tags).'),
   location: z
     .object({
       city: z.string().optional(),
@@ -294,7 +296,18 @@ export function registerPhotoTools(server: McpServer, ctx: ToolContext): void {
     async (args, extra) => {
       try {
         const authToken = requireUserToken(ctx)
-        const { id, ...body } = args
+        const { id, tags, ...rest } = args
+        const body = {
+          ...rest,
+          ...(tags !== undefined
+            ? {
+                tags: tags
+                  .split(',')
+                  .map((tag) => tag.trim())
+                  .filter(Boolean),
+              }
+            : {}),
+        }
         const res = await ctx.client.put(`/photos/${encodeURIComponent(id)}`, body, {
           authToken,
           signal: extra.signal,
