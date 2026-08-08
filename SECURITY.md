@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-The latest released version on npm receives security fixes. This project is pre-1.0; until then, only the most recent release is supported.
+The latest released version on npm receives security fixes. Only the most recent release is supported — there are no parallel maintenance branches for older major versions.
 
 ## Reporting a vulnerability
 

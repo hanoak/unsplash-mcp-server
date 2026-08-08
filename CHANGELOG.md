@@ -1,5 +1,7 @@
 # Changelog
 
+All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## 1.1.0
 
 ### Minor Changes
@@ -10,8 +12,6 @@
   - `npx @hanoak/unsplash-mcp-server login` runs a local OAuth authorization-code flow (opens the consent screen, captures the redirect on a short-lived loopback server, exchanges the code) and persists the resulting user access token to `~/.config/unsplash-mcp-server/credentials.json` with owner-only permissions. `logout` removes it. Unsplash user access tokens don't expire, so this is a one-time step.
   - New env vars `UNSPLASH_SECRET_KEY` and `UNSPLASH_OAUTH_REDIRECT_URI`, only needed to run `login`.
   - The 21 existing read-only tools, and everyone who doesn't run `login`, are unaffected.
-
-All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 1.0.1
 
