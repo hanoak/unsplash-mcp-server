@@ -321,7 +321,20 @@ Tools return trimmed, token-efficient JSON rather than raw Unsplash responses:
 Beyond tools, the server also exposes:
 
 - **Resource** `unsplash://guides/attribution` — a compact compliance guide (attribution, download tracking, hotlinking, content safety) your client can pull in as context.
-- **Prompt** `find_photo` — give it a `subject` (and optional `orientation`); it expands into a task that searches Unsplash and presents an attributed result. _(More prompts are planned — see [Roadmap](#roadmap).)_
+- **Prompts** — ready-made tasks your client can surface directly; each expands into a guided, multi-step tool-calling task:
+
+  | Prompt                   | Arguments                                              | What it does                                                       |
+  | ------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------ |
+  | `find_photo`             | `subject` (required), `orientation?`                   | Search for one photo and present it with attribution.              |
+  | `photo_gallery`          | `theme` (required), `count?`, `orientation?`, `color?` | Build a themed set of photos (up to 10), each with attribution.    |
+  | `topic_spotlight`        | `topic` (required), `count?`                           | Showcase a curated topic's best photos.                            |
+  | `photographer_spotlight` | `username` (required), `count?`                        | A photographer's profile + their most popular work.                |
+  | `platform_pulse`         | _(none)_                                               | A quick Unsplash-wide stats briefing.                              |
+  | `curate_collection` 🔒   | `theme` (required), `count?`, `collection_id?`         | Search, then build (or extend) a real collection from the matches. |
+  | `describe_photo` 🔒      | `id` (required), `description?`, `tags?`               | Add a description/tags to a photo you own.                         |
+  | `refresh_profile` 🔒     | `bio?`, `location?`, `url?`                            | Update your own bio, location, or portfolio URL.                   |
+
+  🔒 = requires [OAuth sign-in](#oauth-sign-in-optional) first.
 
 ## Example prompts
 
@@ -409,8 +422,8 @@ Yes — it's a standard stdio MCP server. See [the client setup section](#2-add-
 Full detail lives in [docs/ROADMAP.md](./docs/ROADMAP.md). In short:
 
 - **v1** _(shipped)_ — the 21 read-only tools, attribution + download-tracking compliance, the attribution resource, and the `find_photo` prompt.
-- **v2** _(current)_ — the 8 OAuth write / `me` endpoints (profile, collections, photo metadata) via a `login`/`logout` CLI and the Unsplash authorization-code flow.
-- **v3** — a `.mcpb` Desktop Extension for one-click Claude Desktop install, plus more MCP prompts.
+- **v2** _(shipped)_ — the 8 OAuth write / `me` endpoints (profile, collections, photo metadata) via a `login`/`logout` CLI and the Unsplash authorization-code flow.
+- **v3** _(current)_ — 7 more MCP prompts covering every tool domain (see [Resources & prompts](#resources--prompts)). A `.mcpb` Desktop Extension was considered for this phase but dropped to unscheduled future scope — `npx` already works across every supported client.
 
 Changes are tracked in [CHANGELOG.md](./CHANGELOG.md); the project follows [Semantic Versioning](https://semver.org).
 
