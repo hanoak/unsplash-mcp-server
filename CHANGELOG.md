@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.2.0
+
+### Minor Changes
+
+- ab74ca1: Add 7 new MCP prompts, covering every tool domain at least once.
+
+  - Read-only: `photo_gallery` (themed multi-photo set with color/mood filters), `topic_spotlight` (curated topic showcase), `photographer_spotlight` (a user's profile + best work), `platform_pulse` (quick Unsplash-wide stats briefing).
+  - OAuth-gated, showcasing the v2 write tools: `curate_collection` (search, then build or extend a real collection), `describe_photo` (tag/describe a photo you own), `refresh_profile` (update your bio/portfolio with before/after).
+  - `find_photo` (from v1) is unchanged.
+
+- 7400e40: Add two more MCP resources, alongside the existing attribution guide:
+
+  - `unsplash://guides/oauth-setup` — how to sign in for the 8 write/`me` tools.
+  - `unsplash://guides/prompts` — a "which prompt to use" reference for the 8 available prompts.
+
 All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## 1.1.0
