@@ -96,7 +96,7 @@ Everything below was built and verified for the first release; the few remaining
 - [x] `[v1]` E2E test that invokes a real tool over the transport + a compliance regression test asserting `download_location` fires on "use" ✅ in-memory tool-call tests + track_download asserts it fires download_location
 - [x] `[v1]` Validate zod schemas against committed **real captured** Unsplash response fixtures (sanitized) ✅ real Unsplash responses (captured live from the API) were parsed through every schema and projected via the tools — all consumed fields confirmed present; also validated hands-on across the 21 tools via MCP Inspector. The captured JSON + an automated regression test were intentionally **not committed** for v1 (avoids committing large captured payloads); revisit if schema-drift regressions become a concern.
 - [x] `[v1]` CI test matrix: Node 20/22 × Linux/macOS/Windows (+ `.nvmrc`) ✅ (Node 18 intentionally dropped — EOL & below our `engines >=20`)
-- [x] `[v1]` Document MCP Inspector (`npx @modelcontextprotocol/inspector`) in the dev/contributor workflow ✅ CONTRIBUTING.md "Testing tools by hand — MCP Inspector"
+- [x] `[v1]` Document MCP Inspector (`npx @modelcontextprotocol/inspector`) in the dev/contributor workflow ✅ CONTRIBUTING.md "Testing tools and prompts by hand — MCP Inspector"
 - [x] `[v1]` Scheduled live schema-drift canary against the real Unsplash API (key-gated repo secret, off the PR path) — **Closed / skipped for v1**: needs a stored API-key secret + scheduled live calls; schemas were already verified against real responses manually (see the fixtures item in §4). Revisit if drift becomes a real problem.
 
 ## 5. CI/CD & release automation ("easy to update in future")

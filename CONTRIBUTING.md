@@ -26,16 +26,16 @@ cp .env.example .env # then add your UNSPLASH_ACCESS_KEY
 | `npm run license:check` | Fail if any production dependency has a non-permissive license. |
 | `npm run check`         | typecheck + lint + format:check + test (core local gate).       |
 
-### Testing tools by hand — MCP Inspector
+### Testing tools and prompts by hand — MCP Inspector
 
-The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is the quickest way to exercise tools interactively:
+The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is the quickest way to exercise tools and prompts interactively:
 
 ```bash
 npm run build
 npx @modelcontextprotocol/inspector -e UNSPLASH_ACCESS_KEY=your_key node dist/index.js
 ```
 
-Connect, open the **Tools** tab, and run any tool. Server logs (stderr) appear in the terminal where you launched the Inspector.
+Connect, open the **Tools** tab, and run any tool. To try the write/`me` tools, run `login` first (see the README's [OAuth sign-in](./README.md#oauth-sign-in-optional) section). Open the **Prompts** tab to run any of the server's prompt templates (`src/prompts.ts`) with sample arguments and check the generated message text. Server logs (stderr) appear in the terminal where you launched the Inspector.
 
 ## Project structure & conventions
 
