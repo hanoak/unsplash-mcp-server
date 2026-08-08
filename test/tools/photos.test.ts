@@ -254,7 +254,7 @@ describe('photos domain tools (in-memory MCP integration)', () => {
     const client = await connect(fn, { userToken: 'user-token-1' })
     const res = (await client.callTool({
       name: 'unsplash_update_photo',
-      arguments: { id: 'rand123', description: 'new desc', tags: ['sunset'] },
+      arguments: { id: 'rand123', description: 'new desc', tags: 'sunset, dawn' },
     })) as CallToolResult
     expect(res.isError).toBeFalsy()
     expect((JSON.parse(firstText(res)) as { photo: { id: string } }).photo.id).toBe('rand123')
@@ -265,7 +265,7 @@ describe('photos domain tools (in-memory MCP integration)', () => {
     expect(new Headers(init.headers).get('authorization')).toBe('Bearer user-token-1')
     expect(JSON.parse(init.body as string)).toEqual({
       description: 'new desc',
-      tags: ['sunset'],
+      tags: ['sunset', 'dawn'],
     })
   })
 })
