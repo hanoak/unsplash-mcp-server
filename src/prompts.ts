@@ -265,4 +265,40 @@ export function registerPrompts(server: McpServer): void {
       return { messages: [{ role: 'user', content: { type: 'text', text } }] }
     },
   )
+
+  server.registerPrompt(
+    'refresh_profile',
+    {
+      title: 'Refresh my Unsplash profile',
+      description: 'Update your own bio, location, or portfolio URL. Requires OAuth sign-in.',
+      argsSchema: {
+        bio: z.string().optional().describe('New bio text.'),
+        location: z.string().optional().describe('New location text.'),
+        url: z.string().optional().describe('New portfolio/website URL.'),
+      },
+    },
+    (args) => {
+      const updates = [
+        args.bio ? `bio: "${args.bio}"` : undefined,
+        args.location ? `location: "${args.location}"` : undefined,
+        args.url ? `url: "${args.url}"` : undefined,
+      ]
+        .filter(Boolean)
+        .join(', ')
+      const applyStep = updates
+        ? `Call \`unsplash_update_my_profile\` (${updates}) to apply the change.`
+        : 'Ask the user what they want to change (bio, location, or portfolio URL), then call ' +
+          '`unsplash_update_my_profile` with those values.'
+
+      const text = [
+        "Refresh the authenticated user's Unsplash profile.",
+        '1. Use `unsplash_get_my_profile` to show the current bio, location, and portfolio URL.',
+        `2. ${applyStep}`,
+        '3. Present the before and after so the user can confirm the change stuck.',
+        LOGIN_REMINDER,
+      ].join('\n')
+
+      return { messages: [{ role: 'user', content: { type: 'text', text } }] }
+    },
+  )
 }

@@ -207,4 +207,29 @@ describe('prompts', () => {
     const text = (got.messages[0]!.content as { type: string; text: string }).text
     expect(text).toContain('Ask the user what new description/tags they want')
   })
+
+  it('templates refresh_profile with bio, location, and url provided', async () => {
+    const client = await connect(noFetch)
+    const { prompts } = await client.listPrompts()
+    expect(prompts.some((p) => p.name === 'refresh_profile')).toBe(true)
+
+    const got = await client.getPrompt({
+      name: 'refresh_profile',
+      arguments: { bio: 'Landscape photographer', location: 'Kyoto', url: 'https://example.com' },
+    })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('bio: "Landscape photographer"')
+    expect(text).toContain('location: "Kyoto"')
+    expect(text).toContain('url: "https://example.com"')
+    expect(text).toContain('unsplash_get_my_profile')
+    expect(text).toContain('unsplash_update_my_profile')
+    expect(text).toContain('login')
+  })
+
+  it('refresh_profile asks the user for values when none are given', async () => {
+    const client = await connect(noFetch)
+    const got = await client.getPrompt({ name: 'refresh_profile', arguments: {} })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('Ask the user what they want to change')
+  })
 })
