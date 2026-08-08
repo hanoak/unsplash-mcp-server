@@ -140,4 +140,15 @@ describe('prompts', () => {
     const text = (got.messages[0]!.content as { type: string; text: string }).text
     expect(text).toContain('per_page: 5')
   })
+
+  it('templates platform_pulse with no arguments', async () => {
+    const client = await connect(noFetch)
+    const { prompts } = await client.listPrompts()
+    expect(prompts.some((p) => p.name === 'platform_pulse')).toBe(true)
+
+    const got = await client.getPrompt({ name: 'platform_pulse', arguments: {} })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('unsplash_total_stats')
+    expect(text).toContain('unsplash_month_stats')
+  })
 })
