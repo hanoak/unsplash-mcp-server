@@ -16,6 +16,18 @@ describe('resources', () => {
     expect(text).toContain('attribution')
     expect(text).toContain('unsplash_track_download')
   })
+
+  it('exposes and reads the oauth-setup-guide resource', async () => {
+    const client = await connect(noFetch)
+    const { resources } = await client.listResources()
+    expect(resources.some((r) => r.uri === 'unsplash://guides/oauth-setup')).toBe(true)
+
+    const res = await client.readResource({ uri: 'unsplash://guides/oauth-setup' })
+    const text = (res.contents[0] as { text: string }).text
+    expect(text).toContain('UNSPLASH_SECRET_KEY')
+    expect(text).toContain('npx @hanoak/unsplash-mcp-server login')
+    expect(text).toContain('do not expire')
+  })
 })
 
 describe('prompts', () => {

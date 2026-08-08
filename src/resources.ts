@@ -24,7 +24,31 @@ const ATTRIBUTION_GUIDE = [
   'Reference: https://help.unsplash.com/en/articles/2511245-unsplash-api-guidelines',
 ].join('\n')
 
-/** Register read-only reference resources (the attribution/compliance guide). */
+const OAUTH_SETUP_GUIDE_URI = 'unsplash://guides/oauth-setup'
+
+/** How to sign in for the 8 write/`me` tools, mirroring the README's "OAuth sign-in" section. */
+const OAUTH_SETUP_GUIDE = [
+  "# Signing in for Unsplash's write/`me` tools",
+  '',
+  'Most tools work with just `UNSPLASH_ACCESS_KEY`. Eight tools — updating your profile, ' +
+    'managing collections, and updating photo metadata — additionally need per-user OAuth ' +
+    'sign-in; they report a clear "not logged in" error until you do this.',
+  '',
+  "1. On your app's page at unsplash.com/oauth/applications, add " +
+    '`http://localhost:8734/callback` as a redirect URI, and copy the **Secret key**.',
+  '2. Set both `UNSPLASH_ACCESS_KEY` and `UNSPLASH_SECRET_KEY` in your shell (this step runs ' +
+    'from a terminal, not through this MCP client).',
+  "3. Run `npx @hanoak/unsplash-mcp-server login`. It opens your browser to Unsplash's consent " +
+    'screen, captures the redirect on a short-lived local server, exchanges the code, and saves ' +
+    'the resulting user access token to `~/.config/unsplash-mcp-server/credentials.json` ' +
+    '(owner-only permissions).',
+  '4. Restart this MCP server/client. The write/`me` tools are now available.',
+  '',
+  'Unsplash user access tokens do not expire, so this is a one-time step — no periodic ' +
+    're-auth. Run `npx @hanoak/unsplash-mcp-server logout` to remove the stored token.',
+].join('\n')
+
+/** Register read-only reference resources (compliance + setup guides). */
 export function registerResources(server: McpServer): void {
   server.registerResource(
     'attribution-guide',
@@ -39,6 +63,23 @@ export function registerResources(server: McpServer): void {
     () => ({
       contents: [
         { uri: ATTRIBUTION_GUIDE_URI, mimeType: 'text/markdown', text: ATTRIBUTION_GUIDE },
+      ],
+    }),
+  )
+
+  server.registerResource(
+    'oauth-setup-guide',
+    OAUTH_SETUP_GUIDE_URI,
+    {
+      title: 'Unsplash OAuth sign-in guide',
+      description:
+        'How to sign in via OAuth to unlock the 8 write/`me` tools (profile, collections, ' +
+        'photo metadata).',
+      mimeType: 'text/markdown',
+    },
+    () => ({
+      contents: [
+        { uri: OAUTH_SETUP_GUIDE_URI, mimeType: 'text/markdown', text: OAUTH_SETUP_GUIDE },
       ],
     }),
   )
