@@ -1,6 +1,37 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
 
+const ORIENTATIONS = ['landscape', 'portrait', 'squarish']
+const COLORS = [
+  'black_and_white',
+  'black',
+  'white',
+  'yellow',
+  'orange',
+  'red',
+  'purple',
+  'magenta',
+  'green',
+  'teal',
+  'blue',
+]
+
+/**
+ * MCP prompt arguments always arrive as strings, and some clients (e.g. Claude
+ * Desktop) send "" for an unfilled optional — which a strict z.enum rejects
+ * with -32602. Keep enum-like args as plain strings and validate them here
+ * instead, silently ignoring anything unrecognized.
+ */
+function pickLenient(value: string | undefined, allowed: readonly string[]): string | undefined {
+  return value && allowed.includes(value) ? value : undefined
+}
+
+/** Parse a prompt's optional numeric arg (also always a string), clamped to [1, max]. */
+function clampCount(value: string | undefined, fallback: number, max: number): number {
+  const n = value ? Number.parseInt(value, 10) : NaN
+  return Number.isFinite(n) && n >= 1 ? Math.min(n, max) : fallback
+}
+
 /** Register prompt templates that guide clients through common Unsplash tasks. */
 export function registerPrompts(server: McpServer): void {
   server.registerPrompt(
@@ -14,10 +45,6 @@ export function registerPrompts(server: McpServer): void {
           .string()
           .min(1)
           .describe('What the photo should depict, e.g. "a foggy pine forest at sunrise".'),
-        // Kept a lenient string rather than a z.enum: MCP prompt arguments always
-        // arrive as strings, and some clients (e.g. Claude Desktop) send "" for an
-        // unfilled optional — which a strict enum rejects with -32602. We validate
-        // the value in the handler instead, ignoring anything unexpected.
         orientation: z
           .string()
           .optional()
@@ -25,17 +52,60 @@ export function registerPrompts(server: McpServer): void {
       },
     },
     (args) => {
-      const ORIENTATIONS = ['landscape', 'portrait', 'squarish']
-      const orientation =
-        args.orientation && ORIENTATIONS.includes(args.orientation)
-          ? ` in ${args.orientation} orientation`
-          : ''
+      const orientation = pickLenient(args.orientation, ORIENTATIONS)
+      const orientationPart = orientation ? ` in ${orientation} orientation` : ''
       const text = [
-        `Find a high-quality Unsplash photo of ${args.subject}${orientation}.`,
+        `Find a high-quality Unsplash photo of ${args.subject}${orientationPart}.`,
         'Use the `unsplash_search_photos` tool, choose the most fitting result, then present it:',
         '- display the image using its `regular` URL,',
         '- include the ready-to-use attribution (`attribution.text` or `attribution.html`),',
         "- and call `unsplash_track_download` with the photo's `download_location` once you present it.",
+      ].join('\n')
+
+      return { messages: [{ role: 'user', content: { type: 'text', text } }] }
+    },
+  )
+
+  server.registerPrompt(
+    'photo_gallery',
+    {
+      title: 'Build an Unsplash photo gallery',
+      description:
+        'Search Unsplash for a themed set of photos and present them all with attribution.',
+      argsSchema: {
+        theme: z
+          .string()
+          .min(1)
+          .describe('What the gallery should be about, e.g. "autumn forests".'),
+        count: z.string().optional().describe('How many photos to include (default 5, max 10).'),
+        orientation: z
+          .string()
+          .optional()
+          .describe('Optional preferred orientation: landscape, portrait, or squarish.'),
+        color: z
+          .string()
+          .optional()
+          .describe('Optional preferred color, e.g. blue, black_and_white, orange.'),
+      },
+    },
+    (args) => {
+      const orientation = pickLenient(args.orientation, ORIENTATIONS)
+      const color = pickLenient(args.color, COLORS)
+      const count = clampCount(args.count, 5, 10)
+
+      const filters = [orientation && `orientation: "${orientation}"`, color && `color: "${color}"`]
+        .filter(Boolean)
+        .join(', ')
+      const filtersSuffix = filters ? ` (${filters})` : ''
+
+      const text = [
+        `Build a themed Unsplash photo gallery about ${args.theme}${filtersSuffix}.`,
+        `Use the \`unsplash_search_photos\` tool (per_page: ${count}${filters ? `, ${filters}` : ''}) ` +
+          `to gather up to ${count} well-matched photos, then present each one:`,
+        '- display the image using its `regular` URL,',
+        '- include the ready-to-use attribution (`attribution.text` or `attribution.html`) next to it,',
+        "- and call `unsplash_track_download` with each photo's `download_location` once you display it.",
+        'Skip any results that do not fit the theme well rather than padding the gallery to the requested count.',
       ].join('\n')
 
       return { messages: [{ role: 'user', content: { type: 'text', text } }] }
