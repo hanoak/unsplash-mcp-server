@@ -112,4 +112,32 @@ describe('prompts', () => {
     const text = (got.messages[0]!.content as { type: string; text: string }).text
     expect(text).toContain('per_page: 5')
   })
+
+  it('templates photographer_spotlight with username and count', async () => {
+    const client = await connect(noFetch)
+    const { prompts } = await client.listPrompts()
+    expect(prompts.some((p) => p.name === 'photographer_spotlight')).toBe(true)
+
+    const got = await client.getPrompt({
+      name: 'photographer_spotlight',
+      arguments: { username: 'janedoe', count: '3' },
+    })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('"janedoe"')
+    expect(text).toContain('per_page: 3')
+    expect(text).toContain('order_by: "popular"')
+    expect(text).toContain('unsplash_get_user')
+    expect(text).toContain('unsplash_user_photos')
+    expect(text).toContain('unsplash_track_download')
+  })
+
+  it('photographer_spotlight falls back to the default count of 5', async () => {
+    const client = await connect(noFetch)
+    const got = await client.getPrompt({
+      name: 'photographer_spotlight',
+      arguments: { username: 'janedoe', count: 'nope' },
+    })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('per_page: 5')
+  })
 })
