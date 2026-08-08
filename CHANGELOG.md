@@ -15,8 +15,6 @@
   - `unsplash://guides/oauth-setup` — how to sign in for the 8 write/`me` tools.
   - `unsplash://guides/prompts` — a "which prompt to use" reference for the 8 available prompts.
 
-All notable changes to this project are documented here. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## 1.1.0
 
 ### Minor Changes
