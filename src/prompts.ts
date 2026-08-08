@@ -111,4 +111,31 @@ export function registerPrompts(server: McpServer): void {
       return { messages: [{ role: 'user', content: { type: 'text', text } }] }
     },
   )
+
+  server.registerPrompt(
+    'topic_spotlight',
+    {
+      title: 'Spotlight an Unsplash topic',
+      description: "Showcase a curated Unsplash topic's best photos with attribution.",
+      argsSchema: {
+        topic: z.string().min(1).describe('The topic ID or slug, e.g. "wallpapers" or "nature".'),
+        count: z.string().optional().describe('How many photos to include (default 5, max 10).'),
+      },
+    },
+    (args) => {
+      const count = clampCount(args.count, 5, 10)
+      const text = [
+        `Spotlight the Unsplash topic "${args.topic}".`,
+        `Use the \`unsplash_get_topic\` tool to introduce it (title + description), then ` +
+          `\`unsplash_topic_photos\` (id: "${args.topic}", per_page: ${count}) to gather up to ` +
+          `${count} of its photos.`,
+        'Present the topic intro first, then each photo:',
+        '- display the image using its `regular` URL,',
+        '- include the ready-to-use attribution (`attribution.text` or `attribution.html`) next to it,',
+        "- and call `unsplash_track_download` with each photo's `download_location` once you display it.",
+      ].join('\n')
+
+      return { messages: [{ role: 'user', content: { type: 'text', text } }] }
+    },
+  )
 }

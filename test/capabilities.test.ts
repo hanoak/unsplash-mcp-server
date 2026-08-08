@@ -85,4 +85,31 @@ describe('prompts', () => {
     const text = (got.messages[0]!.content as { type: string; text: string }).text
     expect(text).toContain('per_page: 10')
   })
+
+  it('templates topic_spotlight with topic and count', async () => {
+    const client = await connect(noFetch)
+    const { prompts } = await client.listPrompts()
+    expect(prompts.some((p) => p.name === 'topic_spotlight')).toBe(true)
+
+    const got = await client.getPrompt({
+      name: 'topic_spotlight',
+      arguments: { topic: 'wallpapers', count: '7' },
+    })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('"wallpapers"')
+    expect(text).toContain('per_page: 7')
+    expect(text).toContain('unsplash_get_topic')
+    expect(text).toContain('unsplash_topic_photos')
+    expect(text).toContain('unsplash_track_download')
+  })
+
+  it('topic_spotlight falls back to the default count of 5', async () => {
+    const client = await connect(noFetch)
+    const got = await client.getPrompt({
+      name: 'topic_spotlight',
+      arguments: { topic: 'nature', count: '' },
+    })
+    const text = (got.messages[0]!.content as { type: string; text: string }).text
+    expect(text).toContain('per_page: 5')
+  })
 })
