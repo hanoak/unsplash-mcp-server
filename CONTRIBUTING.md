@@ -54,7 +54,7 @@ Connect, open the **Tools** tab, and run any tool. To try the write/`me` tools, 
 
 ## Versioning & deprecation policy
 
-This project follows [Semantic Versioning](https://semver.org). **Tool names, input parameters, and output shapes are part of the public contract** — an incompatible change to any of them ships only in a **major** release.
+This project follows [Semantic Versioning](https://semver.org), and [CHANGELOG.md](./CHANGELOG.md) is formatted per [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) (Changesets manages it — don't hand-edit past entries). **Tool names, input parameters, and output shapes are part of the public contract** — an incompatible change to any of them ships only in a **major** release.
 
 When something must change incompatibly, we deprecate before removing: the old behaviour is kept for at least one subsequent **minor** release, called out in the `CHANGELOG`, and — where possible — flagged in the tool description or via a runtime warning that points to the replacement. Removal then happens in the next major. Additive changes (new tools, new optional fields) are minor and backwards-compatible.
 
