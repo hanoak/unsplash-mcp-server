@@ -376,6 +376,7 @@ Photo descriptions, alt text, tags, EXIF, and user names/bios come from Unsplash
 ## Privacy & security
 
 - **No telemetry.** This server collects nothing and phones home to no one. It contacts only `api.unsplash.com`, using the key you provide. No analytics, no tracking.
+- **Verifiable provenance.** Every release is published with [npm provenance](https://docs.npmjs.com/generating-provenance-statements) via GitHub Actions — the npm package page links each version to the exact commit and workflow run that built it.
 - **Key safety.** Your access key is read from the environment only, sent as an `Authorization: Client-ID` header (never in a URL query string), and **redacted from all error output and logs** so it can't leak into pasted bug reports.
 - **SSRF guard.** `unsplash_track_download` only follows `download_location` URLs on the verified `api.unsplash.com` host.
 - To report a vulnerability, see [SECURITY.md](./SECURITY.md).
