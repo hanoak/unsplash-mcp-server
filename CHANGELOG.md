@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1
+
+### Patch Changes
+
+- 05ae9f9: Document the npm provenance guarantee in the README's Privacy & security section. No code changes.
+
 ## 1.2.0
 
 ### Minor Changes
